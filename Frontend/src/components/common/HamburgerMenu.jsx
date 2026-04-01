@@ -15,28 +15,15 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
   // Simple body scroll lock when menu is open
   useEffect(() => {
     if (isOpen) {
-      // Store original overflow
       const originalOverflow = document.body.style.overflow;
-
-      // Lock background scroll
       document.body.style.overflow = 'hidden';
-
-      // Cleanup function
       return () => {
         document.body.style.overflow = originalOverflow;
       };
     }
   }, [isOpen]);
 
-  // Safely access cart items from cartState
   const cartItems = cartState?.items || [];
-
-  const toggleSection = (sectionId) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [sectionId]: !prev[sectionId]
-    }));
-  };
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -48,71 +35,13 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  // Close menu on Escape key
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      return () => document.removeEventListener('keydown', handleEscape);
-    }
-  }, [isOpen, onClose]);
-
-  // Get vendors from cart for chat functionality
   const cartVendors = cartItems.map(item => ({
     id: item.id,
     name: item.name,
     category: item.category,
-    lastMessage: "Hi! I'm interested in your services for my wedding.",
-    timestamp: "2 hours ago",
-    unread: Math.random() > 0.5 // Random for demo
+    unread: Math.random() > 0.5
   }));
 
-  const menuSections = [
-    {
-      id: 'planning',
-      title: 'Wedding Planning Tools',
-      icon: 'calendar',
-      items: [
-        { title: 'Budget Planner', path: '/user/budget-planner', icon: 'money' },
-        { title: 'Wedding Checklist', path: '/user/checklist', icon: 'checkList' },
-        { title: 'Guest List Manager', path: '/user/guest-list', icon: 'users' },
-        { title: 'Wedding Timeline', path: '/user/timeline', icon: 'clock' },
-        { title: 'Vendor Comparison', path: '/user/vendor-comparison', icon: 'compare' },
-        { title: 'Digital E-Invites', path: '/user/e-invites', icon: 'mail' },
-        { title: 'Saved Inspirations', path: '/user/inspirations', icon: 'heart' }
-      ]
-    },
-    {
-      id: 'addons',
-      title: 'Premium Services',
-      icon: 'star',
-      items: [
-        { title: 'Hire Wedding Planner', path: '/user/hire-planner', icon: 'user' },
-        { title: 'Destination Wedding', path: '/user/destination-wedding', icon: 'location' },
-        { title: 'Decor Consultation', path: '/user/decor-consultation', icon: 'palette' },
-        { title: 'Makeup Trial Booking', path: '/user/makeup-trial', icon: 'makeup' },
-        { title: 'Pre-Wedding Shoot', path: '/user/pre-wedding-shoot', icon: 'camera' }
-      ]
-    },
-    {
-      id: 'support',
-      title: 'Support & Settings',
-      icon: 'settings',
-      items: [
-        { title: 'Help & Support', path: '/user/help', icon: 'help' },
-        { title: 'FAQs', path: '/user/faqs', icon: 'question' },
-        { title: 'Contact Support', path: '/user/contact-support', icon: 'phone' },
-        { title: 'Notifications', path: '/user/notifications', icon: 'bell' },
-        { title: 'Language', path: '/user/language', icon: 'globe' },
-        { title: 'Privacy & Terms', path: '/user/privacy', icon: 'shield' }
-      ]
-    }
-  ];
   return (
     <>
       {/* 1. Backdrop with Deep Blur */}

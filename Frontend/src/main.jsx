@@ -4,9 +4,7 @@ import './index.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
-  // Temporarily disable StrictMode to prevent double renders during development
-  // Re-enable for production builds
-  process.env.NODE_ENV === 'production' ? (
+  import.meta.env.PROD ? (
     <StrictMode>
       <App />
     </StrictMode>
