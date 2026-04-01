@@ -12,13 +12,6 @@
             "destination": "/index.html"
         }
     ],
-    "redirects": [
-        {
-            "source": "/",
-            "destination": "/vendor",
-            "permanent": false
-        }
-    ],
     "headers": [
         {
             "source": "/(.*)",
