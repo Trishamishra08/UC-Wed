@@ -139,132 +139,75 @@ const VendorsMain = () => {
   };
 
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: theme.semantic.background.primary }}>
-      {/* Header Section */}
-      <div className="px-4 py-4">
-        {/* Title */}
-        <h1 
-          className="text-center text-lg font-medium mb-2"
-          style={{ color: theme.semantic.text.primary }}
-        >
-          Vendor Categories
-        </h1>
-        
-        {/* City Selector and Icons */}
-        <div className="flex items-center justify-between">
-          {/* City Selector - Left Side */}
-          <div className="flex items-center space-x-1">
-            <span 
-              className="text-base font-medium"
-              style={{ color: theme.colors.primary[500] }}
-            >
-              {selectedCity}
-            </span>
-            <Icon 
-              name="chevronDown" 
-              size="sm" 
-              style={{ color: theme.colors.primary[500] }}
-            />
-          </div>
-          
-          {/* Right Icons */}
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={handleSearchClick}
-              className="transition-colors"
-              style={{ 
-                color: hoveredIcon === 'search' ? theme.semantic.text.primary : theme.semantic.text.secondary,
-                backgroundColor: 'transparent',
-                border: 'none',
-                padding: '8px'
-              }}
-              onMouseEnter={() => setHoveredIcon('search')}
-              onMouseLeave={() => setHoveredIcon(null)}
-            >
-              <Icon name="search" size="md" />
-            </button>
-            <button
-              className="transition-colors"
-              style={{ 
-                color: hoveredIcon === 'bookmark' ? theme.semantic.text.primary : theme.semantic.text.secondary,
-                backgroundColor: 'transparent',
-                border: 'none',
-                padding: '8px'
-              }}
-              onMouseEnter={() => setHoveredIcon('bookmark')}
-              onMouseLeave={() => setHoveredIcon(null)}
-            >
-              <Icon name="bookmark" size="md" />
-            </button>
-          </div>
+    <div className="min-h-screen pb-32" style={{ backgroundColor: '#EAE1D8' }}>
+      {/* 1. Atelier Header - Arched Surface */}
+      <div 
+        className="px-8 pt-12 pb-16 rounded-b-[4rem] bg-white shadow-sm border-b border-[#3D2B2B]/5 relative z-10"
+      >
+        <div className="flex items-center justify-between mb-8">
+           <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#BE185D]"></span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#3D2B2B]/40">Curation Service</span>
+           </div>
+           <button className="w-10 h-10 rounded-full flex items-center justify-center bg-[#EAE1D8]/30 border border-[#EAE1D8]">
+              <Icon name="search" size="xs" style={{ color: '#3D2B2B' }} />
+           </button>
+        </div>
+
+        <div className="space-y-2">
+           <h1 className="text-4xl font-bold text-[#3D2B2B] leading-tight" style={{ fontFamily: '"Playfair Display", serif' }}>
+             The Atelier
+           </h1>
+           <div className="flex items-center gap-2 text-[#BE185D]">
+              <Icon name="location" size="xs" />
+              <span className="text-[11px] font-black uppercase tracking-widest">{selectedCity}</span>
+              <Icon name="chevronDown" size="xs" />
+           </div>
         </div>
       </div>
 
-      {/* Vendor Categories */}
-      <div className="px-4 py-2">
-        <div className="space-y-3">
-          {vendorCategories.map((category) => (
-            <div
-              key={category.id}
-              className="relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
-              style={{ 
-                backgroundColor: category.bgColor,
-                height: '88px' // Fixed height matching reference
-              }}
-              onClick={() => handleCategoryClick(category)}
-            >
-              {/* Content Container */}
-              <div className="flex items-center h-full px-4">
-                {/* Left Side - Text Content */}
-                <div className="flex-1 pr-4">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <h3 
-                      className="text-base font-medium"
-                      style={{ color: theme.semantic.text.primary }}
-                    >
-                      {category.name}
-                    </h3>
-                    <Icon 
-                      name="chevronDown" 
-                      size="xs" 
-                      style={{ color: theme.semantic.text.secondary }} 
-                    />
-                  </div>
-                  <p 
-                    className="text-sm line-clamp-1"
-                    style={{ color: theme.semantic.text.secondary }}
-                  >
-                    {category.subtitle}
-                  </p>
-                </div>
-                
-                {/* Right Side - Circular Image */}
-                <div className="relative">
-                  <div 
-                    className="w-16 h-16 rounded-full overflow-hidden shadow-md"
-                    style={{
-                      transform: 'translateX(8px)', // Partially crop into card edge
-                    }}
-                  >
-                    <img 
-                      src={category.image} 
-                      alt={category.name}
-                      className="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.target.src = 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=400&fit=crop&crop=center';
-                      }}
-                    />
-                  </div>
-                </div>
+      {/* 2. Collections Grid - Arched Cards */}
+      <div className="px-6 -mt-8 relative z-20 space-y-4">
+        {vendorCategories.map((category) => (
+          <div
+            key={category.id}
+            onClick={() => handleCategoryClick(category)}
+            className="bg-white rounded-[2.5rem] p-6 flex items-center gap-6 shadow-sm border border-black/5 hover:shadow-md active:scale-95 transition-all group"
+          >
+            {/* Visual Anchor */}
+            <div className="relative w-20 h-20 shrink-0">
+               <div className="absolute inset-0 rounded-full bg-gray-100 scale-110 group-hover:scale-125 transition-transform duration-500"></div>
+               <img 
+                 src={category.image} 
+                 alt={category.name}
+                 className="w-full h-full rounded-full object-cover relative z-10 border-2 border-white shadow-sm"
+               />
+            </div>
+
+            {/* Editorial Copy */}
+            <div className="flex-1 min-w-0 pr-4">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-xl font-bold text-[#3D2B2B] truncate" style={{ fontFamily: '"Playfair Display", serif' }}>
+                  {category.name}
+                </h3>
+                <Icon name="arrowRight" size="xs" style={{ color: '#3D2B2B/20' }} />
+              </div>
+              <p className="text-[10px] font-medium text-[#3D2B2B]/40 leading-relaxed uppercase tracking-tighter line-clamp-1 italic">
+                {category.subtitle}
+              </p>
+              
+              {/* Subtle Color Indicator */}
+              <div className="mt-3 flex gap-1">
+                 <div className="w-4 h-1 rounded-full opacity-30" style={{ backgroundColor: category.bgColor }}></div>
+                 <div className="w-1 h-1 rounded-full opacity-30" style={{ backgroundColor: category.bgColor }}></div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
-      {/* Bottom spacing for mobile navigation */}
-      <div className="h-4"></div>
+      {/* 3. Global Action Bar Spacing */}
+      <div className="h-10"></div>
     </div>
   );
 };
