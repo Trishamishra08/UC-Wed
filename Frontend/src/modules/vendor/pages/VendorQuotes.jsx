@@ -20,9 +20,17 @@ const VendorQuotes = () => {
   }, [location.state]);
 
   useEffect(() => {
-    if (showModal) { document.body.style.overflow = 'hidden'; }
-    else { document.body.style.overflow = 'unset'; }
-    return () => { document.body.style.overflow = 'unset'; };
+    if (showModal) { 
+      document.body.style.overflow = 'hidden'; 
+      document.body.classList.add('modal-open');
+    } else { 
+      document.body.style.overflow = 'unset'; 
+      document.body.classList.remove('modal-open');
+    }
+    return () => { 
+      document.body.style.overflow = 'unset'; 
+      document.body.classList.remove('modal-open');
+    };
   }, [showModal]);
 
   const handleAddItem = () => {

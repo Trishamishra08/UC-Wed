@@ -11,9 +11,17 @@ const VendorReviews = () => {
   const [replyText, setReplyText] = useState('');
 
   useEffect(() => {
-    if (selectedReview) { document.body.style.overflow = 'hidden'; }
-    else { document.body.style.overflow = 'unset'; }
-    return () => { document.body.style.overflow = 'unset'; };
+    if (selectedReview) { 
+      document.body.style.overflow = 'hidden'; 
+      document.body.classList.add('modal-open');
+    } else { 
+      document.body.style.overflow = 'unset'; 
+      document.body.classList.remove('modal-open');
+    }
+    return () => { 
+      document.body.style.overflow = 'unset'; 
+      document.body.classList.remove('modal-open');
+    };
   }, [selectedReview]);
 
   const handleReplySubmit = () => {

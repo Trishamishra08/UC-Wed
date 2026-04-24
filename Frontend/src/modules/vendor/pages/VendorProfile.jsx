@@ -22,11 +22,14 @@ const VendorProfile = () => {
   useEffect(() => {
     if (showModal) {
       document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-open');
     } else {
       document.body.style.overflow = 'unset';
+      document.body.classList.remove('modal-open');
     }
     return () => {
       document.body.style.overflow = 'unset';
+      document.body.classList.remove('modal-open');
     };
   }, [showModal]);
 
@@ -411,6 +414,21 @@ const VendorProfile = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Logout Section */}
+      <div className="vendor-surface rounded-2xl sm:rounded-3xl p-6 sm:p-8 flex items-center justify-between gap-4 border border-rose-100 bg-rose-50/30">
+        <div>
+          <h3 className="text-lg font-bold text-slate-900">Sign out</h3>
+          <p className="text-sm font-medium text-slate-500">Securely sign out from your vendor account.</p>
+        </div>
+        <button 
+          onClick={() => window.location.href = '/vendor/login'}
+          className="px-6 py-3 rounded-2xl bg-white text-rose-600 font-bold text-sm shadow-sm border border-rose-100 hover:bg-rose-50 transition-all active:scale-95 flex items-center gap-2"
+        >
+          <Icon name="logout" size="sm" color="current" />
+          Logout
+        </button>
       </div>
     </div>
   );

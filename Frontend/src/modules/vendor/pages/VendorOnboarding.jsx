@@ -9,7 +9,8 @@ const steps = [
   { id: 'pricing', label: 'Pricing' },
   { id: 'portfolio', label: 'Portfolio' },
   { id: 'documents', label: 'Documents' },
-  { id: 'bank', label: 'Bank Details' }
+  { id: 'bank', label: 'Bank Details' },
+  { id: 'subscription', label: 'Subscription' }
 ];
 
 const VendorOnboarding = () => {
@@ -29,6 +30,7 @@ const VendorOnboarding = () => {
 
   const [newItem, setNewItem] = useState({ title: '', tag: '' });
   const [showServiceModal, setShowServiceModal] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(false);
   const [newService, setNewService] = useState({
     name: '',
     category: '',
@@ -41,6 +43,20 @@ const VendorOnboarding = () => {
     gst: useRef(null),
     contract: useRef(null)
   };
+
+  useEffect(() => {
+    if (showServiceModal) { 
+      document.body.style.overflow = 'hidden'; 
+      document.body.classList.add('modal-open');
+    } else { 
+      document.body.style.overflow = 'unset'; 
+      document.body.classList.remove('modal-open');
+    }
+    return () => { 
+      document.body.style.overflow = 'unset'; 
+      document.body.classList.remove('modal-open');
+    };
+  }, [showServiceModal]);
 
   const handleSaveService = () => {
     if (!newService.name || !newService.category || !newService.basePrice) {
@@ -134,6 +150,8 @@ const VendorOnboarding = () => {
         return vendorState.documents.idProof && vendorState.documents.gst;
       case 'bank':
         return vendorState.bank.accountName && vendorState.bank.accountNumber && vendorState.bank.ifsc;
+      case 'subscription':
+        return !!vendorState.subscription.planId;
       default:
         return true;
     }
@@ -191,48 +209,22 @@ const VendorOnboarding = () => {
 
   return (
     <div className="max-w-5xl mx-auto pb-4 px-1 sm:px-2 relative z-10">
-      <div className="rounded-3xl p-2.5 sm:p-6 shadow-2xl relative overflow-hidden transition-all duration-700" style={{
-        ...(stepId === 'business' ? {
-          backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), url(/assets/vendor/engeg.jpeg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        } : stepId === 'services' ? {
-          backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), url(/assets/vendor/cheerleader-exactly-captured-right-moment.jpeg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        } : stepId === 'pricing' ? {
-          backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), url(/assets/vendor/download.jpeg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        } : stepId === 'portfolio' ? {
-          backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), url("/assets/vendor/PERFECT WEDDING DAY OUTFIT IDEA.jpeg")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        } : stepId === 'documents' ? {
-          backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), url("/assets/vendor/download (1).jpeg")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        } : stepId === 'bank' ? {
-          backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), url("/assets/vendor/Red Wedding Arch.jpeg")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        } : {
-          background: 'rgba(255, 255, 255, 0.85)'
-        }),
+      <div className="rounded-3xl p-4 sm:p-6 min-h-[60vh] sm:min-h-0 flex flex-col shadow-[0_20px_60px_rgba(237,100,143,0.15)] relative overflow-hidden transition-all duration-700" style={{
+        background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid rgba(210, 138, 140, 0.1)'
+        border: '1px solid rgba(237, 100, 143, 0.1)'
       }}>
         {/* Top gradient accent */}
         <div className="absolute top-0 left-0 right-0 h-2 rounded-t-[2.5rem]" style={{
-          background: 'linear-gradient(90deg, #D28A8C, #C27A7C, #a855f7, #D28A8C)',
+          background: 'linear-gradient(90deg, #ed648f, #f182a5, #f4a0bb, #ed648f)',
           backgroundSize: '200% 100%',
           animation: 'gradient-shift 4s ease infinite'
         }}></div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] drop-shadow-sm" style={{ color: '#9f1239' }}>Vendor Onboarding</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] drop-shadow-sm" style={{ color: '#ed648f' }}>Vendor Onboarding</p>
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-0.5 drop-shadow-md">Complete your profile</h2>
             <p className="text-xs sm:text-sm font-semibold mt-0.5" style={{ color: '#1e293b' }}>Finish setup to boost visibility and unlock leads.</p>
           </div>
@@ -251,9 +243,9 @@ const VendorOnboarding = () => {
                 onClick={(e) => handleStepClick(e, index, step.id)}
                 className="h-8 w-8 sm:h-10 sm:w-10 shrink-0 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold transition-all shadow-md z-10"
                 style={index === currentStepIndex
-                  ? { background: 'linear-gradient(135deg, #be123c, #9f1239)', color: 'white', border: '2px solid white', boxShadow: '0 4px 15px rgba(159, 18, 57, 0.4)', transform: 'scale(1.15)' }
+                  ? { background: 'linear-gradient(135deg, #ed648f, #ed648f)', color: 'white', border: '2px solid white', boxShadow: '0 4px 15px rgba(159, 18, 57, 0.4)', transform: 'scale(1.15)' }
                   : index < currentStepIndex
-                    ? { background: 'white', color: '#9f1239', border: '2px solid #9f1239' }
+                    ? { background: 'white', color: '#ed648f', border: '2px solid #ed648f' }
                     : { background: 'rgba(255, 255, 255, 0.9)', color: '#64748b', border: '2px dashed #cbd5e1' }
                 }
               >
@@ -261,7 +253,7 @@ const VendorOnboarding = () => {
               </NavLink>
               {index < steps.length - 1 && (
                 <div className="h-0.5 rounded w-full flex-1 shrink mx-1.5 sm:mx-3 transition-all shadow-inner" style={{
-                   background: index < currentStepIndex ? 'linear-gradient(90deg, #be123c, #9f1239)' : 'rgba(255, 255, 255, 0.5)'
+                   background: index < currentStepIndex ? 'linear-gradient(90deg, #ed648f, #ed648f)' : 'rgba(255, 255, 255, 0.5)'
                 }}></div>
               )}
             </div>
@@ -269,26 +261,26 @@ const VendorOnboarding = () => {
         </div>
 
         {/* Dynamic Centered Step Heading */}
-        <div className="mt-2 mb-3 flex flex-col items-center justify-center text-center px-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight drop-shadow-lg bg-white/90 px-5 py-2.5 rounded-[1.5rem] border-2 border-white backdrop-blur-md shadow-xl inline-block">
+        <div className="mt-1 mb-2 flex flex-col items-center justify-center text-center px-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {steps[currentStepIndex]?.label}
           </h2>
-          <div className="h-1 w-16 rounded-full mt-1.5 shadow-sm" style={{ background: 'linear-gradient(90deg, #be123c, #fb7185)' }}></div>
+          <div className="h-1 w-12 rounded-full mt-2" style={{ background: '#ed648f' }}></div>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-3 flex-1">
           {stepId === 'business' && (
-            <div className="space-y-6 max-w-2xl mx-auto">
+            <div className="space-y-4 max-w-2xl mx-auto">
               {/* 1. Description */}
               <div className="space-y-1.5 animate-in fade-in slide-in-from-bottom-2 duration-500">
                 <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>
-                  Business description <span style={{ color: '#be123c' }}>*</span>
+                  Business description <span style={{ color: '#ed648f' }}>*</span>
                 </label>
                 <textarea
                   autoFocus
                   className="w-full rounded-2xl px-5 py-4 text-sm font-semibold transition-all focus:ring-2 focus:ring-rose-500/20 resize-none"
                   style={{
-                    border: '1px solid rgba(210, 138, 140, 0.15)',
+                    border: '1px solid rgba(237, 100, 143, 0.15)',
                     background: 'rgba(255, 255, 255, 0.95)',
                     minHeight: '120px'
                   }}
@@ -305,12 +297,12 @@ const VendorOnboarding = () => {
                 <div className="grid gap-4 sm:grid-cols-2 animate-in fade-in slide-in-from-bottom-3 duration-500">
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>
-                      Years of experience <span style={{ color: '#be123c' }}>*</span>
+                      Years of experience <span style={{ color: '#ed648f' }}>*</span>
                     </label>
                     <input
                       className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all focus:ring-2 focus:ring-rose-500/20"
                       style={{
-                        border: '1px solid rgba(210, 138, 140, 0.15)',
+                        border: '1px solid rgba(237, 100, 143, 0.15)',
                         background: 'rgba(255, 255, 255, 0.95)'
                       }}
                       value={vendorState.businessDetails.years}
@@ -325,12 +317,12 @@ const VendorOnboarding = () => {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>
-                      Team size <span style={{ color: '#be123c' }}>*</span>
+                      Team size <span style={{ color: '#ed648f' }}>*</span>
                     </label>
                     <input
                       className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all focus:ring-2 focus:ring-rose-500/20"
                       style={{
-                        border: '1px solid rgba(210, 138, 140, 0.15)',
+                        border: '1px solid rgba(237, 100, 143, 0.15)',
                         background: 'rgba(255, 255, 255, 0.95)'
                       }}
                       value={vendorState.businessDetails.teamSize}
@@ -348,15 +340,15 @@ const VendorOnboarding = () => {
 
               {/* 3. Professional Details - Reveal when stats are filled */}
               {vendorState.businessDetails.years && vendorState.businessDetails.teamSize && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>
-                      Languages spoken <span style={{ color: '#be123c' }}>*</span>
+                      Languages spoken <span style={{ color: '#ed648f' }}>*</span>
                     </label>
                     <input
                       className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all focus:ring-2 focus:ring-rose-500/20"
                       style={{
-                        border: '1px solid rgba(210, 138, 140, 0.15)',
+                        border: '1px solid rgba(237, 100, 143, 0.15)',
                         background: 'rgba(255, 255, 255, 0.95)'
                       }}
                       value={vendorState.businessDetails.languages.join(', ')}
@@ -374,12 +366,12 @@ const VendorOnboarding = () => {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>
-                      Service cities <span style={{ color: '#be123c' }}>*</span>
+                      Service cities <span style={{ color: '#ed648f' }}>*</span>
                     </label>
                     <input
                       className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all focus:ring-2 focus:ring-rose-500/20"
                       style={{
-                        border: '1px solid rgba(210, 138, 140, 0.15)',
+                        border: '1px solid rgba(237, 100, 143, 0.15)',
                         background: 'rgba(255, 255, 255, 0.95)'
                       }}
                       value={vendorState.businessDetails.serviceCities.join(', ')}
@@ -426,7 +418,7 @@ const VendorOnboarding = () => {
                     backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.55)), url("/assets/vendor/download (2).jpeg")',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    border: '1px solid rgba(210, 138, 140, 0.2)',
+                    border: '1px solid rgba(237, 100, 143, 0.2)',
                     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
                   }}>
                     {/* Glassmorphic inner container for content */}
@@ -447,14 +439,14 @@ const VendorOnboarding = () => {
                       </button>
                     </div>
 
-                    <div className="space-y-6">
-                      <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="space-y-4">
+                      <div className="grid gap-3 sm:grid-cols-2">
                         <div className="space-y-1.5">
                           <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>Service Name</label>
                           <input
                             className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all focus:ring-2 focus:ring-rose-500/20"
                             style={{
-                              border: '1px solid rgba(210, 138, 140, 0.2)',
+                              border: '1px solid rgba(237, 100, 143, 0.2)',
                               background: 'rgba(255, 255, 255, 0.95)'
                             }}
                             placeholder="e.g. Royal Stage Decor"
@@ -467,21 +459,44 @@ const VendorOnboarding = () => {
                         </div>
                         <div className="space-y-1.5">
                           <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>Category</label>
-                          <select
-                            className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all appearance-none focus:ring-2 focus:ring-rose-500/20"
-                            style={{
-                              border: '1px solid rgba(210, 138, 140, 0.2)',
-                              background: 'rgba(255, 255, 255, 0.95)'
-                            }}
-                            value={newService.category}
-                            onChange={(e) => setNewService({ ...newService, category: e.target.value })}
-                          >
-                            <option value="">Select Category</option>
-                            <option>Decoration</option>
-                            <option>Photography</option>
-                            <option>Catering</option>
-                            <option>Venue</option>
-                          </select>
+                          <div className="relative">
+                            <div 
+                              className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold border transition-all cursor-pointer flex items-center justify-between gap-2 shadow-sm"
+                              style={{
+                                borderColor: 'rgba(237, 100, 143, 0.2)',
+                                background: 'rgba(255, 255, 255, 0.95)',
+                                color: '#ed648f'
+                              }}
+                              onClick={() => setOpenDropdown(!openDropdown)}
+                            >
+                              {newService.category || 'Select Category'}
+                              <Icon name="chevronDown" size="xs" color="#ed648f" className={`transition-transform duration-300 ${openDropdown ? 'rotate-180' : ''}`} />
+                            </div>
+
+                            {/* Custom Dropdown Menu */}
+                            {openDropdown && (
+                              <>
+                                <div className="fixed inset-0 z-[90]" onClick={() => setOpenDropdown(false)}></div>
+                                <div className="absolute left-0 top-full mt-1.5 w-full bg-white rounded-xl shadow-2xl border border-[#ed648f20] transition-all z-[100] overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200">
+                                  {['Decoration', 'Photography', 'Catering', 'Venue'].map((cat) => (
+                                    <div
+                                      key={cat}
+                                      className={`px-4 py-2.5 text-sm font-bold cursor-pointer transition-colors flex items-center gap-3 ${
+                                        newService.category === cat ? 'bg-[#ed648f10] text-[#ed648f]' : 'text-slate-600 hover:bg-[#ed648f08] hover:text-[#ed648f]'
+                                      }`}
+                                      onClick={() => {
+                                        setNewService({...newService, category: cat});
+                                        setOpenDropdown(false);
+                                      }}
+                                    >
+                                      <div className={`w-1.5 h-1.5 rounded-full transition-all ${newService.category === cat ? 'bg-[#ed648f] scale-100' : 'bg-transparent scale-0'}`}></div>
+                                      {cat}
+                                    </div>
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -491,7 +506,7 @@ const VendorOnboarding = () => {
                           type="number"
                           className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all focus:ring-2 focus:ring-rose-500/20"
                           style={{
-                            border: '1px solid rgba(210, 138, 140, 0.2)',
+                            border: '1px solid rgba(237, 100, 143, 0.2)',
                             background: 'rgba(255, 255, 255, 0.95)'
                           }}
                           placeholder="e.g. 50000"
@@ -509,7 +524,7 @@ const VendorOnboarding = () => {
                               placeholder={`Service Feature ${idx + 1}`}
                               className="w-full rounded-2xl px-5 py-3 text-sm font-semibold transition-all outline-none focus:ring-2 focus:ring-rose-500/20"
                               style={{
-                                border: '1px solid rgba(210, 138, 140, 0.15)',
+                                border: '1px solid rgba(237, 100, 143, 0.15)',
                                 background: 'rgba(255, 255, 255, 0.95)'
                               }}
                               value={inc}
@@ -525,7 +540,7 @@ const VendorOnboarding = () => {
 
                       <button
                         className="vendor-cta w-full rounded-2xl py-5 font-bold text-lg mt-6 active:scale-95 transition-all shadow-xl"
-                        style={{ background: 'linear-gradient(135deg, #be123c, #9f1239)' }}
+                        style={{ background: 'linear-gradient(135deg, #ed648f, #ed648f)' }}
                         onClick={handleSaveService}
                       >
                         ✨ Save Service
@@ -541,14 +556,14 @@ const VendorOnboarding = () => {
                   background: 'rgba(255, 255, 255, 0.95)'
                 }}>
                   <div className="text-3xl mb-3">✨</div>
-                  <p className="text-xs sm:text-sm font-bold" style={{ color: '#9f1239' }}>No services added yet. Click &quot;Add service&quot; to get started.</p>
+                  <p className="text-xs sm:text-sm font-bold" style={{ color: '#ed648f' }}>No services added yet. Click &quot;Add service&quot; to get started.</p>
                 </div>
               ) : (
-                <div className="grid gap-5 md:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2">
                   {vendorState.services.map((service) => (
                     <div key={service.id} className="rounded-3xl p-6 relative group transition-all hover:scale-[1.02]" style={{
                       background: 'rgba(255, 255, 255, 0.9)',
-                      border: '1px solid rgba(210, 138, 140, 0.1)',
+                      border: '1px solid rgba(237, 100, 143, 0.1)',
                       boxShadow: '0 4px 20px rgba(210, 138, 140, 0.05)'
                     }}>
                       <button
@@ -556,8 +571,8 @@ const VendorOnboarding = () => {
                         className="absolute -top-3 -right-3 h-8 w-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
                         style={{
                           background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)',
-                          border: '1px solid rgba(210, 138, 140, 0.2)',
-                          color: '#A35E60'
+                          border: '1px solid rgba(237, 100, 143, 0.2)',
+                          color: '#ed648f'
                         }}
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -567,10 +582,10 @@ const VendorOnboarding = () => {
                       <div className="flex items-center justify-between">
                         <h4 className="font-bold text-slate-900 text-lg">{service.name}</h4>
                         <span className="rounded-full px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider" style={{
-                          background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)', color: '#A35E60'
+                          background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)', color: '#ed648f'
                         }}>{service.category}</span>
                       </div>
-                      <p className="mt-3 text-sm font-bold" style={{ color: '#D28A8C' }}>Base price: ₹{service.basePrice.toLocaleString()}</p>
+                      <p className="mt-3 text-sm font-bold" style={{ color: '#ed648f' }}>Base price: ₹{service.basePrice.toLocaleString()}</p>
                       <div className="mt-4 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#334155' }}>Packages: <span style={{ color: '#64748b' }}>{service.packages.map((pkg) => pkg.name).join(', ')}</span></div>
                       {service.inclusions && service.inclusions.length > 0 && (
                         <div className="mt-4 flex flex-wrap gap-2">
@@ -591,15 +606,15 @@ const VendorOnboarding = () => {
           )}
 
           {stepId === 'pricing' && (
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-3 lg:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#334155' }}>
-                  Price range <span style={{ color: '#D28A8C' }}>*</span>
+                  Price range <span style={{ color: '#ed648f' }}>*</span>
                 </label>
                 <input
                   className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all"
                   style={{
-                    border: '1px solid rgba(210, 138, 140, 0.15)',
+                    border: '1px solid rgba(237, 100, 143, 0.15)',
                     background: 'rgba(255, 255, 255, 0.9)'
                   }}
                   value={vendorState.pricing.range}
@@ -612,7 +627,7 @@ const VendorOnboarding = () => {
                 <textarea
                   className="h-32 w-full rounded-2xl px-5 py-4 text-sm font-semibold transition-all resize-none"
                   style={{
-                    border: '1px solid rgba(210, 138, 140, 0.15)',
+                    border: '1px solid rgba(237, 100, 143, 0.15)',
                     background: 'rgba(255, 255, 255, 0.9)'
                   }}
                   value={vendorState.pricing.notes}
@@ -636,13 +651,13 @@ const VendorOnboarding = () => {
                 <div className="space-y-3">
                   <div className="rounded-[2.5rem] border border-white/40 p-5 sm:p-8 shadow-xl overflow-hidden relative" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.8), rgba(244,223,223,0.5))' }}>
                     <div className="absolute inset-0 backdrop-blur-sm -z-10"></div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-3" style={{ color: '#be123c' }}>Add new showcase</p>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-3" style={{ color: '#ed648f' }}>Add new showcase</p>
                     <div className="space-y-3">
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>Project Title</label>
                         <input
                           className="w-full rounded-2xl px-5 py-2 text-sm font-semibold transition-all focus:ring-2 focus:ring-rose-500/10"
-                          style={{ border: '1px solid rgba(210, 138, 140, 0.2)', background: 'rgba(255, 255, 255, 0.95)' }}
+                          style={{ border: '1px solid rgba(237, 100, 143, 0.2)', background: 'rgba(255, 255, 255, 0.95)' }}
                           placeholder="e.g. Royal Palace Wedding"
                           value={newItem.title}
                           onKeyDown={(e) => {
@@ -656,7 +671,7 @@ const VendorOnboarding = () => {
                         <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>Category Tag</label>
                         <input
                           className="w-full rounded-2xl px-5 py-2 text-sm font-semibold transition-all focus:ring-2 focus:ring-rose-500/10"
-                          style={{ border: '1px solid rgba(210, 138, 140, 0.2)', background: 'rgba(255, 255, 255, 0.95)' }}
+                          style={{ border: '1px solid rgba(237, 100, 143, 0.2)', background: 'rgba(255, 255, 255, 0.95)' }}
                           placeholder="e.g. Reception, Ceremony"
                           value={newItem.tag}
                           onKeyDown={(e) => {
@@ -691,7 +706,7 @@ const VendorOnboarding = () => {
                       background: 'rgba(255, 255, 255, 0.95)'
                     }}>
                       <div className="text-4xl mb-3">📷</div>
-                      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#9f1239' }}>Your portfolio is empty</p>
+                      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#ed648f' }}>Your portfolio is empty</p>
                     </div>
                   ) : (
                     vendorState.portfolio.map((item) => (
@@ -720,12 +735,12 @@ const VendorOnboarding = () => {
               {['idProof', 'gst', 'contract'].map((docKey) => (
                 <div key={docKey} className="flex items-center justify-between rounded-3xl p-6 transition-all hover:scale-[1.02]" style={{
                   background: 'rgba(255, 255, 255, 0.7)',
-                  border: '1px solid rgba(210, 138, 140, 0.1)',
+                  border: '1px solid rgba(237, 100, 143, 0.1)',
                   boxShadow: '0 4px 20px rgba(210, 138, 140, 0.05)'
                 }}>
                   <div>
                     <div className="flex items-center gap-3 mb-1">
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'linear-gradient(135deg, #D28A8C, #C27A7C)' }}>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'linear-gradient(135deg, #ed648f, #ed648f)' }}>
                         {docKey === 'idProof' ? '1' : docKey === 'gst' ? '2' : '3'}
                       </div>
                       <p className="text-sm font-bold text-slate-900">
@@ -745,8 +760,8 @@ const VendorOnboarding = () => {
                     type="button"
                     className="rounded-2xl px-5 py-3 text-xs font-bold transition-all active:scale-95 whitespace-nowrap"
                     style={vendorState.documents[docKey]
-                      ? { background: 'linear-gradient(135deg, #D28A8C, #C27A7C)', color: 'white', boxShadow: '0 4px 15px rgba(210, 138, 140, 0.3)' }
-                      : { background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)', color: '#A35E60', border: '1px solid rgba(210, 138, 140, 0.15)' }}
+                      ? { background: 'linear-gradient(135deg, #ed648f, #ed648f)', color: 'white', boxShadow: '0 4px 15px rgba(210, 138, 140, 0.3)' }
+                      : { background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)', color: '#ed648f', border: '1px solid rgba(237, 100, 143, 0.15)' }}
                     onClick={() => handleDocClick(docKey)}
                   >
                     {vendorState.documents[docKey] ? '✓ Uploaded' : 'Upload File'}
@@ -757,7 +772,7 @@ const VendorOnboarding = () => {
           )}
 
           {stepId === 'bank' && (
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-3 lg:grid-cols-2">
               <div className="lg:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/85 backdrop-blur-md shadow-sm p-6 rounded-3xl border border-[#F4DFDF]">
                 <div>
                   <p className="text-sm font-bold text-slate-900 uppercase tracking-wide drop-shadow-sm">Payment Information</p>
@@ -765,10 +780,10 @@ const VendorOnboarding = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#334155' }}>Account name <span style={{ color: '#D28A8C' }}>*</span></label>
+                <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#334155' }}>Account name <span style={{ color: '#ed648f' }}>*</span></label>
                 <input
                   className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all"
-                  style={{ border: '1px solid rgba(210, 138, 140, 0.15)', background: 'rgba(255, 255, 255, 0.9)' }}
+                  style={{ border: '1px solid rgba(237, 100, 143, 0.15)', background: 'rgba(255, 255, 255, 0.9)' }}
                   value={vendorState.bank.accountName}
                   placeholder="Name as per bank records"
                   onChange={(event) => updateVendorState({
@@ -780,10 +795,10 @@ const VendorOnboarding = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#334155' }}>Account number <span style={{ color: '#D28A8C' }}>*</span></label>
+                <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#334155' }}>Account number <span style={{ color: '#ed648f' }}>*</span></label>
                 <input
                   className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all"
-                  style={{ border: '1px solid rgba(210, 138, 140, 0.15)', background: 'rgba(255, 255, 255, 0.9)' }}
+                  style={{ border: '1px solid rgba(237, 100, 143, 0.15)', background: 'rgba(255, 255, 255, 0.9)' }}
                   value={vendorState.bank.accountNumber}
                   placeholder="Enter 12-16 digit account number"
                   onChange={(event) => updateVendorState({ bank: { ...vendorState.bank, accountNumber: event.target.value.replace(/[^0-9]/g, '') } })}
@@ -793,10 +808,10 @@ const VendorOnboarding = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#334155' }}>IFSC Code <span style={{ color: '#D28A8C' }}>*</span></label>
+                <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#334155' }}>IFSC Code <span style={{ color: '#ed648f' }}>*</span></label>
                 <input
                   className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all"
-                  style={{ border: '1px solid rgba(210, 138, 140, 0.15)', background: 'rgba(255, 255, 255, 0.9)' }}
+                  style={{ border: '1px solid rgba(237, 100, 143, 0.15)', background: 'rgba(255, 255, 255, 0.9)' }}
                   value={vendorState.bank.ifsc}
                   placeholder="e.g. SBIN0001234"
                   onChange={(event) => updateVendorState({ bank: { ...vendorState.bank, ifsc: event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') } })}
@@ -806,7 +821,7 @@ const VendorOnboarding = () => {
                 <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#334155' }}>UPI ID</label>
                 <input
                   className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold transition-all"
-                  style={{ border: '1px solid rgba(210, 138, 140, 0.15)', background: 'rgba(255, 255, 255, 0.9)' }}
+                  style={{ border: '1px solid rgba(237, 100, 143, 0.15)', background: 'rgba(255, 255, 255, 0.9)' }}
                   value={vendorState.bank.upiId}
                   placeholder="e.g. name@upi"
                   onChange={(event) => updateVendorState({ bank: { ...vendorState.bank, upiId: event.target.value.toLowerCase().replace(/[^a-z0-9.@-]/g, '') } })}
@@ -814,9 +829,84 @@ const VendorOnboarding = () => {
               </div>
             </div>
           )}
+
+          {stepId === 'subscription' && (
+            <div className="space-y-6 max-w-2xl mx-auto py-4">
+              <div className="text-center mb-8">
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900">Choose your growth partner</h3>
+                <p className="text-xs sm:text-sm font-medium mt-1" style={{ color: '#64748b' }}>Select a plan to start receiving verified leads and boost your business.</p>
+              </div>
+
+              <div 
+                className={`relative group rounded-[2.5rem] p-8 sm:p-10 transition-all duration-500 cursor-pointer overflow-hidden border-2 ${
+                  vendorState.subscription.planId === 'yearly' 
+                    ? 'border-[#ed648f] shadow-2xl shadow-[#ed648f20]' 
+                    : 'border-slate-100 hover:border-[#ed648f40] hover:shadow-xl bg-white/50'
+                }`}
+                onClick={() => updateVendorState({ subscription: { ...vendorState.subscription, planId: 'yearly' } })}
+              >
+                {/* Popular Badge */}
+                <div className="absolute top-6 right-6 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest text-white shadow-lg animate-pulse" style={{ background: 'linear-gradient(135deg, #ed648f, #f182a5)' }}>
+                  Most Popular
+                </div>
+
+                <div className="relative z-10">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="h-14 w-14 rounded-2xl flex items-center justify-center shadow-inner" style={{ background: 'rgba(237, 100, 143, 0.1)', color: '#ed648f' }}>
+                      <Icon name="sparkles" size="lg" color="current" />
+                    </div>
+                    <div>
+                      <h4 className="text-2xl font-bold text-slate-900">Yearly Premium</h4>
+                      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#ed648f' }}>Growth & Visibility Plan</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-baseline gap-1 mb-8">
+                    <span className="text-4xl font-black text-slate-900">₹4,999</span>
+                    <span className="text-sm font-bold text-slate-400">/ per year</span>
+                  </div>
+
+                  <div className="space-y-4 mb-8">
+                    {[
+                      'Receive unlimited verified leads',
+                      'Priority ranking in search results',
+                      'Full portfolio & video showcase',
+                      'Exclusive verified vendor badge',
+                      'Direct customer chat access',
+                      'Premium 24/7 dedicated support'
+                    ].map((feature, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="h-5 w-5 rounded-full flex items-center justify-center bg-emerald-50 text-emerald-500">
+                          <Icon name="checkList" size="xs" color="current" />
+                        </div>
+                        <span className="text-sm font-semibold text-slate-600">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button 
+                    className={`w-full py-4 rounded-2xl font-bold transition-all duration-300 ${
+                      vendorState.subscription.planId === 'yearly'
+                        ? 'bg-[#ed648f] text-white shadow-lg shadow-[#ed648f40]'
+                        : 'bg-slate-100 text-slate-500 group-hover:bg-[#ed648f10] group-hover:text-[#ed648f]'
+                    }`}
+                  >
+                    {vendorState.subscription.planId === 'yearly' ? 'Plan Selected' : 'Select Yearly Plan'}
+                  </button>
+                </div>
+
+                {/* Decorative background circle */}
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full opacity-5 group-hover:opacity-10 transition-opacity" style={{ background: '#ed648f' }}></div>
+              </div>
+
+              <p className="text-[10px] text-center font-medium px-4" style={{ color: '#94a3b8' }}>
+                * Subscription amounts are subject to change based on platform policies. Taxes as applicable.
+              </p>
+            </div>
+          )}
         </div>
 
-        <div className="mt-12 pt-8 border-t flex justify-end" style={{ borderColor: 'rgba(210, 138, 140, 0.15)' }}>
+        <div className="mt-6 pt-4 border-t flex justify-end" style={{ borderColor: 'rgba(237, 100, 143, 0.15)' }}>
           <button
             type="button"
             className="vendor-cta rounded-2xl px-12 py-4 text-base font-bold tracking-wide shadow-xl transition-all active:scale-95"
@@ -834,9 +924,9 @@ const VendorOnboarding = () => {
               style={{
                 background: toast.type === 'error'
                   ? 'linear-gradient(135deg, #ef4444, #b91c1c)'
-                  : 'linear-gradient(135deg, #D28A8C, #C27A7C, #a855f7)',
+                  : 'linear-gradient(135deg, #ed648f, #ed648f, #a855f7)',
                 color: 'white',
-                boxShadow: '0 20px 40px -10px rgba(210, 138, 140, 0.4)'
+                boxShadow: '0 20px 40px -10px rgba(237, 100, 143, 0.4)'
               }}>
               {toast.type === 'loading' ? (
                 <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

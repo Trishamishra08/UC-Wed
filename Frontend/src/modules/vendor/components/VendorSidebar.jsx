@@ -14,7 +14,8 @@ const navItems = [
   { label: 'Chat', to: '/vendor/chat', icon: 'chat' },
   { label: 'Earnings', to: '/vendor/earnings', icon: 'trophy' },
   { label: 'Reviews', to: '/vendor/reviews', icon: 'star' },
-  { label: 'Support', to: '/vendor/support', icon: 'help' }
+  { label: 'Support', to: '/vendor/support', icon: 'help' },
+  { label: 'Settings', to: '/vendor/settings', icon: 'edit' }
 ];
 
 const VendorSidebar = ({ onClose }) => {
@@ -22,24 +23,24 @@ const VendorSidebar = ({ onClose }) => {
   return (
     <aside className="h-full w-72" style={{
       background: 'linear-gradient(180deg, #ffffff 0%, #FAF2F2 100%)',
-      borderRight: '1px solid rgba(210, 138, 140, 0.08)'
+      borderRight: '1px solid rgba(237, 100, 143, 0.08)'
     }}>
       <div className="h-full flex flex-col">
         {/* Brand Header */}
-        <div className="px-6 py-6" style={{ borderBottom: '1px solid rgba(210, 138, 140, 0.08)' }}>
+        <div className="px-6 py-6" style={{ borderBottom: '1px solid rgba(237, 100, 143, 0.08)' }}>
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <div className="h-24 w-auto flex items-center justify-center transition-transform hover:scale-110">
                   <img src="/assets/vendor/logo_theme.png" alt="UtsavChakra Logo" className="h-full w-auto rounded-2xl" />
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#D28A8C' }}>Vendor Panel</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#ed648f' }}>Vendor Panel</p>
               </div>
               <h2 className="text-lg font-bold text-slate-900 tracking-tight">Emerald Studio</h2>
             </div>
             <button
               type="button"
-              className="lg:hidden text-slate-400 hover:text-[#D28A8C] transition-colors"
+              className="lg:hidden text-slate-400 hover:text-[#ed648f] transition-colors"
               onClick={onClose}
               aria-label="Close menu"
             >
@@ -48,15 +49,15 @@ const VendorSidebar = ({ onClose }) => {
           </div>
           <div className="mt-3 flex items-center gap-2 text-xs font-semibold" style={{ color: '#94a3b8' }}>
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: '#D28A8C' }}></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: '#D28A8C' }}></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: '#ed648f' }}></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: '#ed648f' }}></span>
             </span>
             Online & accepting
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 no-scrollbar">
+        <nav className="flex-1 overflow-y-auto min-h-0 px-3 py-4 space-y-1 no-scrollbar overscroll-contain touch-pan-y">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -64,12 +65,12 @@ const VendorSidebar = ({ onClose }) => {
               className={({ isActive }) =>
                 `group flex items-center gap-3 rounded-2xl px-4 py-3 text-[13px] font-semibold transition-all duration-300 relative overflow-hidden ${isActive
                   ? 'text-white shadow-lg'
-                  : 'text-slate-500 hover:text-[#C27A7C] hover:bg-[#FAF2F2]/50'
+                  : 'text-slate-500 hover:text-[#ed648f] hover:bg-[#FAF2F2]/50'
                 }`
               }
               style={({ isActive }) => isActive ? {
-                background: 'linear-gradient(135deg, #D28A8C, #C27A7C)',
-                boxShadow: '0 8px 25px rgba(210, 138, 140, 0.3)'
+                background: 'linear-gradient(135deg, #ed648f, #ed648f)',
+                boxShadow: '0 8px 25px rgba(237, 100, 143, 0.3)'
               } : {}}
               onClick={onClose}
             >
@@ -95,7 +96,7 @@ const VendorSidebar = ({ onClose }) => {
         </nav>
 
         {/* Sign Out */}
-        <div className="px-4 py-4" style={{ borderTop: '1px solid rgba(210, 138, 140, 0.08)' }}>
+        <div className="px-4 py-4" style={{ borderTop: '1px solid rgba(237, 100, 143, 0.08)' }}>
           <button
             type="button"
             className="w-full rounded-2xl px-4 py-3.5 text-sm font-semibold text-slate-500 hover:text-rose-600 active:scale-95 transition-all flex items-center justify-center gap-3"

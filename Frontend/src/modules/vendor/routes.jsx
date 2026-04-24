@@ -19,6 +19,7 @@ import VendorEarnings from './pages/VendorEarnings';
 import VendorReviews from './pages/VendorReviews';
 import VendorProfile from './pages/VendorProfile';
 import VendorSupport from './pages/VendorSupport';
+import VendorSettings from './pages/VendorSettings';
 
 const VendorRoutes = () => {
   return (
@@ -44,6 +45,7 @@ const VendorRoutes = () => {
         <Route path="reviews" element={<VendorReviews />} />
         <Route path="profile" element={<VendorProfile />} />
         <Route path="support" element={<VendorSupport />} />
+        <Route path="settings" element={<VendorSettings />} />
       </Route>
       <Route path="" element={<Navigate to="/vendor/register" replace />} />
       <Route path="*" element={<Navigate to="/vendor/register" replace />} />
