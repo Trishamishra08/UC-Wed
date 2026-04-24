@@ -4,7 +4,7 @@
 
 .vendor-shell {
   font-family: 'Poppins', 'Plus Jakarta Sans', sans-serif;
-  background: linear-gradient(135deg, #FAF2F2 0%, #F4DFDF 30%, #f5f3ff 70%, #eff6ff 100%);
+  background: linear-gradient(135deg, #fff5f7 0%, #ffffff 50%, #fff1f2 100%);
   color: #1e293b;
   min-height: 100vh;
 }
@@ -21,9 +21,9 @@
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(210, 138, 140, 0.08);
+  border: 1px solid rgba(237, 100, 143, 0.08);
   box-shadow: 
-    0 4px 24px rgba(210, 138, 140, 0.06),
+    0 4px 24px rgba(237, 100, 143, 0.06),
     0 1px 3px rgba(0, 0, 0, 0.04);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
@@ -31,9 +31,9 @@
 .vendor-shell .vendor-surface:hover {
   transform: translateY(-4px);
   box-shadow: 
-    0 20px 50px rgba(210, 138, 140, 0.12),
+    0 20px 50px rgba(237, 100, 143, 0.12),
     0 4px 12px rgba(0, 0, 0, 0.06);
-  border-color: rgba(210, 138, 140, 0.15);
+  border-color: rgba(237, 100, 143, 0.15);
 }
 
 .vendor-shell .vendor-surface-soft {
@@ -43,22 +43,22 @@
 
 /* ---- Accent Colors - WedMeGood Pink ---- */
 .vendor-shell .vendor-accent {
-  color: #D28A8C;
+  color: #ed648f;
 }
 
 .vendor-shell .vendor-accent-bg {
-  background: linear-gradient(135deg, #FAF2F2, #F4DFDF);
-  color: #A35E60;
+  background: linear-gradient(135deg, #fff5f7, #ffe4e6);
+  color: #ed648f;
 }
 
 /* ---- CTA Buttons - Vibrant Gradient ---- */
 .vendor-shell .vendor-cta {
-  background: linear-gradient(135deg, #C85A5D 0%, #B84A4D 50%, #8B3A3D 100%);
+  background: linear-gradient(135deg, #ed648f 0%, #da4f7a 50%, #c43e69 100%);
   color: #ffffff;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   box-shadow: 
-    0 4px 15px rgba(200, 90, 93, 0.45),
-    0 2px 4px rgba(200, 90, 93, 0.3);
+    0 4px 15px rgba(237, 100, 143, 0.45),
+    0 2px 4px rgba(237, 100, 143, 0.3);
   position: relative;
   overflow: hidden;
 }
@@ -81,13 +81,13 @@
 .vendor-shell .vendor-cta:hover {
   transform: translateY(-3px) scale(1.02);
   box-shadow: 
-    0 12px 30px rgba(200, 90, 93, 0.5),
-    0 4px 8px rgba(200, 90, 93, 0.35);
+    0 12px 30px rgba(237, 100, 143, 0.5),
+    0 4px 8px rgba(237, 100, 143, 0.35);
 }
 
 .vendor-shell .vendor-cta:active {
   transform: translateY(1px) scale(0.98);
-  box-shadow: 0 2px 8px rgba(200, 90, 93, 0.4);
+  box-shadow: 0 2px 8px rgba(237, 100, 143, 0.4);
 }
 
 /* ---- General Button Interactions ---- */
@@ -103,17 +103,17 @@
 
 /* ---- Outline CTA ---- */
 .vendor-shell .vendor-cta-outline {
-  border: 2px solid #C85A5D;
-  color: #8B3A3D;
+  border: 2px solid #ed648f;
+  color: #ed648f;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   background: transparent;
 }
 
 .vendor-shell .vendor-cta-outline:hover {
-  background: linear-gradient(135deg, #FAF2F2, #F4DFDF);
-  color: #C85A5D;
+  background: linear-gradient(135deg, #fff5f7, #ffe4e6);
+  color: #ed648f;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(200, 90, 93, 0.25);
+  box-shadow: 0 8px 25px rgba(237, 100, 143, 0.25);
 }
 
 /* ---- Muted Text ---- */
@@ -255,8 +255,8 @@
 .vendor-shell input:focus,
 .vendor-shell select:focus,
 .vendor-shell textarea:focus {
-  border-color: #D28A8C !important;
-  box-shadow: 0 0 0 4px rgba(210, 138, 140, 0.1) !important;
+  border-color: #ed648f !important;
+  box-shadow: 0 0 0 4px rgba(237, 100, 143, 0.1) !important;
   outline: none !important;
 }
 

@@ -40,6 +40,10 @@ export const defaultVendorState = {
     ifsc: '',
     upiId: ''
   },
+  subscription: {
+    planId: '',
+    status: 'Pending'
+  },
   listingStatus: 'Draft',
   leads: [
     {
@@ -137,7 +141,8 @@ export const computeProfileCompletion = (state) => {
     state.pricing?.range,
     (state.portfolio || []).length > 0,
     state.documents?.idProof && state.documents?.gst,
-    state.bank?.accountNumber
+    state.bank?.accountNumber,
+    state.subscription?.planId
   ];
   const completed = sections.filter(Boolean).length;
   return Math.round((completed / sections.length) * 100);

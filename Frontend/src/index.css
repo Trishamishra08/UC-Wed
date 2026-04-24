@@ -321,3 +321,8 @@
 .hamburger-menu-content::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
 }
+
+/* Modal Open Styles */
+body.modal-open .vendor-bottom-nav {
+  display: none !important;
+}
