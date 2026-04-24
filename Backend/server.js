@@ -4,6 +4,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
+const http = require('http');
+const { Server } = require('socket.io');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
@@ -15,6 +17,34 @@ const vendorRoutes = require('./modules/vendor');
 
 // Create Express app
 const app = express();
+const httpServer = http.createServer(app);
+
+// Initialize Socket.io
+const io = new Server(httpServer, {
+  cors: {
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true
+  }
+});
+
+// Socket.io connection handling
+io.on('connection', (socket) => {
+  console.log(`🔌 New client connected: ${socket.id}`);
+
+  socket.on('disconnect', () => {
+    console.log(`🔌 Client disconnected: ${socket.id}`);
+  });
+});
+
+// Make io accessible in requests
+app.set('io', io);
 
 // Database connection
 const connectDB = async () => {
@@ -33,17 +63,24 @@ app.use(helmet({
 }));
 
 // CORS configuration
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://192.168.1.28:5173',
-  'https://uc-wed.vercel.app'
-];
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+  : [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://192.168.1.28:5173',
+    'http://localhost:3000',
+    'http://localhost:8080',
+    'https://uc-wed.vercel.app'
+  ];
 
 app.use(cors({
   origin: function (origin, callback) {
     // allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+
     if (allowedOrigins.indexOf(origin) === -1) {
+      console.error(`❌ CORS Error: Origin ${origin} not allowed. Allowed origins: ${allowedOrigins.join(', ')}`);
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
     }
@@ -165,9 +202,10 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   await connectDB();
 
-  app.listen(PORT, () => {
+  httpServer.listen(PORT, () => {
     console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-    console.log(`📱 API URL: http://localhost:${PORT}/api`);
+    console.log(`� Allowed CORS Origins: ${allowedOrigins.join(', ')}`);
+    console.log(`�📱 API URL: http://localhost:${PORT}/api`);
     console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
   });
 };

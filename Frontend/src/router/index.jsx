@@ -73,6 +73,7 @@ import Help from '../modules/user/help/Help';
 import Dashboard from '../modules/user/dashboard/Dashboard';
 import MyBookings from '../modules/user/bookings/MyBookings';
 import VendorRoutes from '../modules/vendor/routes';
+import AdminRoutes from '../modules/admin/routes';
 
 const AppRouter = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -90,10 +91,10 @@ const AppRouter = () => {
     <Routes>
       {/* Root - Always show Welcome page on load */}
       <Route path="/" element={<Welcome />} />
-      
+
       {/* Route alias for vender misspelling */}
       <Route path="/vender/*" element={<Navigate to="/vendor" replace />} />
-      
+
       {/* Auth Routes */}
       <Route path="/login" element={
         isAuthenticated ? <Navigate to="/user/dashboard" replace /> : <Login />
@@ -101,16 +102,17 @@ const AppRouter = () => {
       <Route path="/signup" element={
         isAuthenticated ? <Navigate to="/user/wedding-details" replace /> : <Signup />
       } />
-      
+
       <Route path="/vendor/*" element={<VendorRoutes />} />
-      
+      <Route path="/admin/*" element={<AdminRoutes />} />
+
       {/* Protected Routes */}
       <Route path="/user/*" element={
         <ProtectedRoute>
           <Routes>
             {/* Wedding Details - No Header/BottomNav */}
             <Route path="wedding-details" element={<WeddingDetailsForm />} />
-            
+
             {/* All other routes with Header/BottomNav */}
             <Route path="*" element={
               <div className="min-h-screen bg-theme-card">
@@ -134,24 +136,24 @@ const AppRouter = () => {
                     <Route path="chats" element={<ChatsList />} />
                     <Route path="chats/:vendorId" element={<VendorChat />} />
                     <Route path="ai-assistant" element={<AIAssistant />} />
-                    
+
                     {/* Family Group Routes */}
                     <Route path="family/contacts" element={<FamilyContacts />} />
                     <Route path="family/create-group" element={<CreateGroup />} />
                     <Route path="family/group/:groupId" element={<GroupChat />} />
                     <Route path="family/groups" element={<FamilyGroups />} />
-                    
+
                     <Route path="account" element={<Account />} />
                     <Route path="account/profile" element={<Profile />} />
                     <Route path="account/contact" element={<Contact />} />
                     <Route path="account/reviews" element={<Reviews />} />
                     <Route path="account/payments" element={<Payments />} />
-                    
+
                     {/* Settings Routes */}
                     <Route path="privacy" element={<Privacy />} />
                     <Route path="language" element={<Language />} />
                     <Route path="notifications" element={<Notifications />} />
-                    
+
                     {/* Planning Tools Routes */}
                     <Route path="tools/budget" element={<BudgetPlanner />} />
                     <Route path="tools/checklist" element={<WeddingChecklist />} />
@@ -159,12 +161,12 @@ const AppRouter = () => {
                     <Route path="tools/guests" element={<GuestList />} />
                     <Route path="tools/vendors" element={<VendorManagement />} />
                     <Route path="tools/inspiration" element={<InspirationBoard />} />
-                    
+
                     {/* Quick Access Routes */}
                     <Route path="bookings" element={<MyBookings />} />
                     <Route path="shortlist" element={<Shortlist />} />
                     <Route path="favourites" element={<Favourites />} />
-                    
+
                     {/* Inspiration & Ideas Routes */}
                     <Route path="inspirations" element={<Inspirations />} />
                     <Route path="inspirations/:id" element={<InspirationDetail />} />
@@ -174,14 +176,14 @@ const AppRouter = () => {
                     <Route path="trending/:category" element={<PlaceholderPage title="Trending Now" description="Discover what's trending in weddings" icon="trending" />} />
                     <Route path="feed/:id" element={<PlaceholderPage title="Wedding Feed" description="Explore wedding ideas and trends" icon="grid" />} />
                     <Route path="reads/:id" element={<PlaceholderPage title="Wedding Article" description="Read interesting wedding tips and guides" icon="book" />} />
-                    
+
                     {/* Vendor Collection Routes */}
                     <Route path="photographers/:collection" element={<PhotographerCollection />} />
                     <Route path="venues/:collection" element={<VenueCollection />} />
                     <Route path="makeup/:id" element={<PlaceholderPage title="Makeup Artist" description="View makeup artist profile and portfolio" icon="makeup" />} />
                     <Route path="decorator/:id" element={<PlaceholderPage title="Decorator" description="View decorator profile and work" icon="palette" />} />
                     <Route path="photographer/:id" element={<PhotographerDetail />} />
-                    
+
                     {/* Service Routes */}
                     <Route path="special-offers" element={<SpecialOffers />} />
                     <Route path="venue-booking-offer" element={<VenueBookingOffer />} />
@@ -195,43 +197,43 @@ const AppRouter = () => {
                     <Route path="trending" element={<Trending />} />
                     <Route path="featured-video" element={<FeaturedVideo />} />
                     <Route path="reads" element={<PlaceholderPage title="Wedding Reads" description="Browse all wedding articles and guides" icon="book" />} />
-                    
+
                     {/* Traditional Calendar Routes */}
                     <Route path="festivals" element={<Festivals />} />
                     <Route path="horoscope" element={<Horoscope />} />
 
                     {/* Wedding Planning Tools */}
                     <Route path="budget-planner" element={
-                      <PlaceholderPage 
-                        title="Budget Planner" 
+                      <PlaceholderPage
+                        title="Budget Planner"
                         description="Plan and track your wedding expenses with our smart budget management tool."
                         icon="money"
                       />
                     } />
                     <Route path="checklist" element={
-                      <PlaceholderPage 
-                        title="Wedding Checklist" 
+                      <PlaceholderPage
+                        title="Wedding Checklist"
                         description="Never miss a detail with our comprehensive wedding planning checklist."
                         icon="checkList"
                       />
                     } />
                     <Route path="guest-list" element={
-                      <PlaceholderPage 
-                        title="Guest List Manager" 
+                      <PlaceholderPage
+                        title="Guest List Manager"
                         description="Organize your guest list, track RSVPs, and manage invitations effortlessly."
                         icon="users"
                       />
                     } />
                     <Route path="timeline" element={
-                      <PlaceholderPage 
-                        title="Wedding Timeline" 
+                      <PlaceholderPage
+                        title="Wedding Timeline"
                         description="Create and manage your wedding day timeline to ensure everything runs smoothly."
                         icon="clock"
                       />
                     } />
                     <Route path="vendor-comparison" element={
-                      <PlaceholderPage 
-                        title="Vendor Comparison" 
+                      <PlaceholderPage
+                        title="Vendor Comparison"
                         description="Compare vendors side by side to make the best choice for your wedding."
                         icon="compare"
                       />
@@ -241,18 +243,18 @@ const AppRouter = () => {
                     <Route path="e-invites/edit/:id" element={<EditInvite />} />
                     <Route path="e-invites/preview/:id" element={<PreviewInvite />} />
                     <Route path="e-invites/customize/:templateId" element={<PlaceholderPage title="Customize Template" description="Customize your chosen template" icon="edit" />} />
-                    
+
                     {/* Premium Services */}
                     <Route path="hire-planner" element={<PlaceholderPage title="Hire Planner" description="Connect with planners" icon="user" />} />
-                    
+
                     {/* Support & Settings */}
                     <Route path="help" element={<Help />} />
                     <Route path="faqs" element={<PlaceholderPage title="FAQs" description="Answers to questions" icon="question" />} />
-                    
+
                     <Route path="language" element={<Language />} />
                     <Route path="notifications" element={<Notifications />} />
                     <Route path="privacy" element={<Privacy />} />
-                    
+
                     {/* Redirect unknown user routes to dashboard */}
                     <Route path="*" element={<Navigate to="/user/dashboard" replace />} />
                   </Routes>

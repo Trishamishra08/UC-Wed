@@ -1,0 +1,77 @@
+/* Full Salmon Theme for Admin Panel */
+.admin-theme {
+    --color-primary-50: #FFF5F5;
+    --color-primary-100: #FFEBEB;
+    --color-primary-200: #FFD6D7;
+    --color-primary-300: #FFB8B9;
+    --color-primary-400: #F9AEAF;
+    --color-primary-500: #E88E8F;
+    --color-primary-600: #D07A7B;
+    --color-primary-700: #B05A5B;
+    --color-primary-800: #904041;
+    --color-primary-900: #702A2B;
+
+    /* Background Overrides */
+    --color-bg-primary: #FFF9F9;
+    /* Very subtle pinkish white */
+    --color-text-primary: #4A2B2B;
+    /* Deep warm brown-gray instead of harsh black */
+}
+
+/* Custom Scrollbar for Admin Components */
+.admin-theme .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+.admin-theme .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.admin-theme .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(249, 174, 175, 0.25);
+    border-radius: 20px;
+}
+
+.admin-theme .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #F9AEAF;
+}
+
+/* Global scrollbar for admin pages */
+.admin-theme ::-webkit-scrollbar {
+    width: 8px;
+}
+
+.admin-theme ::-webkit-scrollbar-track {
+    background: #FFF9F9;
+}
+
+.admin-theme ::-webkit-scrollbar-thumb {
+    background: rgba(249, 174, 175, 0.2);
+    border-radius: 20px;
+    border: 2px solid #FFF9F9;
+}
+
+.admin-theme ::-webkit-scrollbar-thumb:hover {
+    background: #F9AEAF;
+}
+
+/* Firefox compatibility within admin theme */
+.admin-theme {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(249, 174, 175, 0.3) transparent;
+}
+
+/* Softening backgrounds across all admin cards */
+.admin-theme .bg-white {
+    background-color: #ffffff;
+}
+
+.admin-theme .bg-slate-50 {
+    background-color: #FFF5F5;
+}
+
+.admin-theme .border-slate-200,
+.admin-theme .border-slate-100 {
+    border-color: rgba(249, 174, 175, 0.15);
+}
