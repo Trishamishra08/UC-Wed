@@ -7,7 +7,7 @@ const navItems = [
   { label: 'Services', to: '/vendor/services', icon: 'store' },
   { label: 'Pricing', to: '/vendor/pricing', icon: 'money' },
   { label: 'Portfolio', to: '/vendor/portfolio', icon: 'image' },
-  { label: 'Leads', to: '/vendor/leads', icon: 'mail' },
+  { label: 'Inquiries', to: '/vendor/leads', icon: 'mail' },
   { label: 'Quotes', to: '/vendor/quotes', icon: 'book' },
   { label: 'Bookings', to: '/vendor/bookings', icon: 'calendar' },
   { label: 'Calendar', to: '/vendor/calendar', icon: 'clock' },
@@ -21,43 +21,43 @@ const navItems = [
 const VendorSidebar = ({ onClose, isApproved }) => {
   const navigate = useNavigate();
   return (
-    <aside className="h-full w-72" style={{
-      background: 'linear-gradient(180deg, #ffffff 0%, #FAF2F2 100%)',
-      borderRight: '1px solid rgba(237, 100, 143, 0.08)'
+    <aside className="h-screen fixed left-0 top-0 w-72 flex flex-col z-40" style={{
+      background: 'linear-gradient(180deg, #ffffff 0%, #F1F5F9 100%)',
+      borderRight: '1px solid rgba(15, 23, 42, 0.05)'
     }}>
       <div className="h-full flex flex-col">
         {/* Brand Header */}
-        <div className="px-6 py-6" style={{ borderBottom: '1px solid rgba(237, 100, 143, 0.08)' }}>
+        <div className="px-6 py-5" style={{ borderBottom: '1px solid rgba(15, 23, 42, 0.05)' }}>
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <div className="h-24 w-auto flex items-center justify-center transition-transform hover:scale-110">
+                <div className="h-14 w-auto flex items-center justify-center transition-transform hover:scale-110">
                    <img src="/assets/vendor/logo_theme.png" alt="UtsavChakra Logo" className="h-full w-auto rounded-2xl" />
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#ed648f' }}>Vendor Panel</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: '#9D174D' }}>Vendor Panel</p>
               </div>
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">Emerald Studio</h2>
+              <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none">Emerald Studio</h2>
             </div>
             <button
               type="button"
-              className="lg:hidden text-slate-400 hover:text-[#ed648f] transition-colors"
+              className="lg:hidden text-slate-400 hover:text-[#9D174D] transition-colors"
               onClick={onClose}
               aria-label="Close menu"
             >
               <Icon name="close" size="lg" color="current" />
             </button>
           </div>
-          <div className="mt-3 flex items-center gap-2 text-xs font-semibold" style={{ color: '#94a3b8' }}>
-            <span className="relative flex h-2.5 w-2.5">
+          <div className="mt-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
+            <span className="relative flex h-2 w-2">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isApproved ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isApproved ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${isApproved ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
             </span>
             {isApproved ? 'Online & Active' : 'Under Review'}
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto min-h-0 px-3 py-4 space-y-1 no-scrollbar overscroll-contain touch-pan-y">
+        <nav className="flex-1 overflow-y-auto min-h-0 px-3 py-4 space-y-1.5 custom-scrollbar overscroll-contain touch-pan-y">
           {navItems.map((item) => {
             const isHome = item.label === 'Dashboard' || item.label === 'Profile';
             const isDisabled = !isApproved && !isHome;
@@ -71,28 +71,25 @@ const VendorSidebar = ({ onClose, isApproved }) => {
                   else onClose();
                 }}
                 className={({ isActive }) =>
-                  `group flex items-center gap-3 rounded-2xl px-4 py-3 text-[13px] font-semibold transition-all duration-300 relative overflow-hidden ${
+                  `group flex items-center gap-3 text-[11px] font-black uppercase tracking-widest transition-all duration-300 relative overflow-hidden px-4 py-2.5 rounded-xl ${
                     isActive && !isDisabled
                     ? 'text-white shadow-lg'
-                    : isDisabled ? 'text-slate-300' : 'text-slate-500 hover:text-[#ed648f] hover:bg-[#FAF2F2]/50'
+                    : isDisabled ? 'text-slate-300' : 'text-slate-500 hover:text-[#9D174D] hover:bg-slate-50'
                   }`
                 }
                 style={({ isActive }) => isActive && !isDisabled ? {
-                  background: 'linear-gradient(135deg, #ed648f, #ed648f)',
-                  boxShadow: '0 8px 25px rgba(237, 100, 143, 0.3)'
+                  background: 'linear-gradient(135deg, #9D174D, #831843)',
+                  boxShadow: '0 8px 25px rgba(157, 23, 77, 0.3)'
                 } : {}}
               >
                 {({ isActive }) => (
                   <>
-                    {isActive && !isDisabled && (
-                      <div className="absolute left-0 top-0 w-1 h-full rounded-r-full bg-white/40"></div>
-                    )}
-                    <div className={`flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-300 ${
+                    <div className={`flex items-center justify-center h-7 w-7 rounded-lg transition-all duration-300 ${
                       isActive && !isDisabled
                       ? 'bg-white/20'
-                      : isDisabled ? 'bg-slate-50' : 'bg-slate-50 group-hover:bg-[#F4DFDF]'
+                      : isDisabled ? 'bg-slate-50' : 'bg-slate-50 group-hover:bg-slate-100 shadow-sm'
                       }`}>
-                      <Icon name={isDisabled ? 'lock' : item.icon} size="sm" color="current" />
+                      <Icon name={isDisabled ? 'lock' : item.icon} size="xs" color="current" />
                     </div>
                     <span>{item.label}</span>
                     {isActive && !isDisabled && (
@@ -106,13 +103,12 @@ const VendorSidebar = ({ onClose, isApproved }) => {
         </nav>
 
         {/* Sign Out */}
-        <div className="px-4 py-4" style={{ borderTop: '1px solid rgba(237, 100, 143, 0.08)' }}>
+        <div className="px-4 py-4" style={{ borderTop: '1px solid rgba(15, 23, 42, 0.05)' }}>
           <button
             type="button"
-            className="w-full rounded-2xl px-4 py-3.5 text-sm font-semibold text-slate-500 hover:text-rose-600 active:scale-95 transition-all flex items-center justify-center gap-3"
+            className="w-full rounded-xl px-4 h-12 text-[11px] font-black uppercase tracking-widest text-white shadow-xl shadow-rose-100 active:scale-95 transition-all flex items-center justify-center gap-3"
             style={{
-              background: 'linear-gradient(135deg, #FAF2F2, #fff1f2)',
-              border: '1px solid rgba(210, 138, 140, 0.1)'
+              background: 'linear-gradient(135deg, #9D174D, #831843)',
             }}
             onClick={() => navigate('/vendor/login')}
           >

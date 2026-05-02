@@ -112,6 +112,4 @@ export const LenisProvider = ({ children }) => {
 export const useLenisContext = () => {
   const context = useContext(LenisContext);
   return context;
-};
-
-export default LenisProvider;
+};

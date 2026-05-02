@@ -4,7 +4,7 @@ import Icon from '../../../components/ui/Icon';
 const VendorSettings = () => {
   const [activeTab, setActiveTab] = useState('account');
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState(''); // 'password', 'delete', 'logout'
+  const [modalType, setModalType] = useState(''); 
 
   const [settings, setSettings] = useState({
     email: 'contact@emeraldstudio.com',
@@ -23,296 +23,203 @@ const VendorSettings = () => {
     }
   });
 
-  useEffect(() => {
-    if (showModal) { 
-      document.body.style.overflow = 'hidden'; 
-      document.body.classList.add('modal-open');
-    } else { 
-      document.body.style.overflow = 'unset'; 
-      document.body.classList.remove('modal-open');
-    }
-    return () => { 
-      document.body.style.overflow = 'unset'; 
-      document.body.classList.remove('modal-open');
-    };
-  }, [showModal]);
-
-  const toggleNotification = (key) => {
+  const toggleSetting = (category, key) => {
     setSettings(prev => ({
       ...prev,
-      notifications: {
-        ...prev.notifications,
-        [key]: !prev.notifications[key]
+      [category]: {
+        ...prev[category],
+        [key]: !prev[category][key]
       }
     }));
-  };
-
-  const togglePrivacy = (key) => {
-    setSettings(prev => ({
-      ...prev,
-      privacy: {
-        ...prev.privacy,
-        [key]: !prev.privacy[key]
-      }
-    }));
-  };
-
-  const openModal = (type) => {
-    setModalType(type);
-    setShowModal(true);
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-7 relative overflow-hidden">
-        <div className="absolute -top-20 -right-20 w-44 h-44 rounded-full opacity-15" style={{
-          background: 'radial-gradient(circle, #ed648f, transparent 70%)'
+    <div className="space-y-4 sm:space-y-5 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* Compact Header */}
+      <div className="vendor-surface rounded-xl p-4 sm:p-5 relative overflow-hidden bg-[#FFF5F7] border border-rose-100 shadow-sm">
+        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-10" style={{
+          background: 'radial-gradient(circle, #9D174D, transparent 70%)'
         }}></div>
-        <div className="relative z-10">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#ed648f' }}>Settings</p>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1">Account Preferences</h2>
-          <p className="text-xs sm:text-sm font-medium" style={{ color: '#94a3b8' }}>Manage your account security, notifications, and app behavior.</p>
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+             <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-[#9D174D] shadow-sm">
+                <Icon name="settings" size="sm" />
+             </div>
+             <div>
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#9D174D]">Preferences</p>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none">Account Settings</h2>
+             </div>
+          </div>
+          <p className="text-[9px] font-black text-rose-400 uppercase tracking-widest hidden sm:block">Configuration Hub</p>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[240px_1fr]">
-        {/* Sidebar Tabs */}
-        <div className="flex lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
+      <div className="grid gap-4 lg:grid-cols-[240px_1fr]">
+        
+        {/* Sidebar Tabs - Compact High Density */}
+        <div className="flex lg:flex-col gap-1.5 overflow-x-auto pb-1 lg:pb-0 no-scrollbar">
           {[
-            { id: 'account', label: 'Account', icon: 'account' },
-            { id: 'notifications', label: 'Notifications', icon: 'clock' },
+            { id: 'account', label: 'General', icon: 'account' },
+            { id: 'notifications', label: 'Alerts', icon: 'clock' },
             { id: 'privacy', label: 'Privacy', icon: 'checkList' },
             { id: 'security', label: 'Security', icon: 'mail' }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap lg:w-full ${
+              className={`flex items-center gap-3 px-4 h-11 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap lg:w-full border ${
                 activeTab === tab.id 
-                  ? 'bg-white text-[#ed648f] shadow-sm border border-[#ed648f20]' 
-                  : 'text-slate-500 hover:bg-white hover:text-[#ed648f]'
+                  ? 'bg-[#9D174D] text-white border-[#9D174D] shadow-lg shadow-rose-100' 
+                  : 'bg-white text-slate-400 border-rose-50 hover:bg-[#FFF5F7] hover:text-[#9D174D]'
               }`}
             >
-              <Icon name={tab.icon} size="xs" color="current" />
+              <Icon name={tab.icon} size="xs" />
               {tab.label}
             </button>
           ))}
         </div>
 
         {/* Content Area */}
-        <div className="vendor-surface rounded-2xl sm:rounded-3xl p-5 sm:p-8 min-h-[400px]">
+        <div className="space-y-4">
+          
           {activeTab === 'account' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Personal Information</h3>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Email Address</label>
-                    <div className="flex gap-2">
-                      <input 
-                        className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold bg-slate-50 border border-slate-100 text-slate-500 cursor-not-allowed"
-                        value={settings.email}
-                        readOnly
-                      />
-                      <button className="px-3 py-2 rounded-xl bg-slate-100 text-slate-400 hover:text-[#ed648f] transition-all">
-                        <Icon name="edit" size="xs" />
-                      </button>
-                    </div>
+            <div className="grid gap-3 animate-in fade-in duration-300">
+               {/* Personal Info Card */}
+               <div className="vendor-surface rounded-2xl p-5 bg-white border border-rose-50 shadow-sm">
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Personal Information</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                     <div className="space-y-1">
+                        <label className="text-[8px] font-black text-slate-300 uppercase px-1">Email Address</label>
+                        <div className="flex gap-2">
+                           <input 
+                             className="flex-1 rounded-xl px-4 py-2.5 text-xs font-bold bg-slate-50 border-0 text-slate-500"
+                             value={settings.email}
+                             readOnly
+                           />
+                           <button className="h-9 w-9 rounded-xl bg-[#FFF5F7] text-[#9D174D] flex items-center justify-center shadow-sm">
+                              <Icon name="edit" size="xs" />
+                           </button>
+                        </div>
+                     </div>
+                     <div className="space-y-1">
+                        <label className="text-[8px] font-black text-slate-300 uppercase px-1">Phone Number</label>
+                        <div className="flex gap-2">
+                           <input 
+                             className="flex-1 rounded-xl px-4 py-2.5 text-xs font-bold bg-slate-50 border-0 text-slate-500"
+                             value={settings.phone}
+                             readOnly
+                           />
+                           <button className="h-9 w-9 rounded-xl bg-[#FFF5F7] text-[#9D174D] flex items-center justify-center shadow-sm">
+                              <Icon name="edit" size="xs" />
+                           </button>
+                        </div>
+                     </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Phone Number</label>
-                    <div className="flex gap-2">
-                      <input 
-                        className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold bg-slate-50 border border-slate-100 text-slate-500 cursor-not-allowed"
-                        value={settings.phone}
-                        readOnly
-                      />
-                      <button className="px-3 py-2 rounded-xl bg-slate-100 text-slate-400 hover:text-[#ed648f] transition-all">
-                        <Icon name="edit" size="xs" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+               </div>
 
-              <div className="pt-6 border-t border-slate-100">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">App Preferences</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
-                    <div>
-                      <p className="text-sm font-bold text-slate-700">Display Language</p>
-                      <p className="text-xs text-slate-500 font-medium">Select your preferred language for the app.</p>
-                    </div>
-                    <button className="text-sm font-bold text-[#ed648f] flex items-center gap-1">
-                      {settings.language}
-                      <Icon name="chevronDown" size="xs" />
-                    </button>
+               {/* App Preferences Card */}
+               <div className="vendor-surface rounded-2xl p-5 bg-[#FDF2F8] border border-rose-50 shadow-sm">
+                  <h3 className="text-[10px] font-black text-[#ed648f] uppercase tracking-widest mb-4">Platform Config</h3>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-white/60 border border-white">
+                     <div>
+                        <p className="text-xs font-black text-slate-900 uppercase tracking-tight">Display Language</p>
+                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">Application default localization</p>
+                     </div>
+                     <button className="text-[10px] font-black text-[#9D174D] flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-rose-50 uppercase tracking-widest">
+                        {settings.language}
+                        <Icon name="chevronDown" size="xs" />
+                     </button>
                   </div>
-                </div>
-              </div>
+               </div>
             </div>
           )}
 
           {activeTab === 'notifications' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-4">Notification Settings</h3>
-              <div className="space-y-3">
-                {[
-                  { id: 'push', label: 'Push Notifications', desc: 'Get alerts for new leads and messages on your device.' },
-                  { id: 'email', label: 'Email Alerts', desc: 'Receive weekly summaries and important account updates.' },
-                  { id: 'whatsapp', label: 'WhatsApp Updates', desc: 'Get instant lead notifications directly on WhatsApp.' },
-                  { id: 'marketing', label: 'Marketing Communications', desc: 'Stay updated with new features and special offers.' }
-                ].map(item => (
-                  <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 border border-slate-100 transition-all hover:bg-white group">
-                    <div className="pr-4">
-                      <p className="text-sm font-bold text-slate-700">{item.label}</p>
-                      <p className="text-[11px] text-slate-500 font-medium mt-0.5">{item.desc}</p>
-                    </div>
-                    <button 
-                      onClick={() => toggleNotification(item.id)}
-                      className={`w-12 h-6 rounded-full relative transition-all duration-300 ${
-                        settings.notifications[item.id] ? 'bg-[#ed648f]' : 'bg-slate-200'
-                      }`}
-                    >
-                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${
-                        settings.notifications[item.id] ? 'left-7' : 'left-1'
-                      }`}></div>
-                    </button>
+            <div className="vendor-surface rounded-2xl p-5 bg-white border border-rose-50 shadow-sm space-y-2 animate-in fade-in duration-300">
+               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Alert Preferences</h3>
+               {[
+                  { id: 'push', label: 'Push Notifications', desc: 'New leads and direct messages alerts' },
+                  { id: 'email', label: 'Email Reports', desc: 'Weekly summaries and account updates' },
+                  { id: 'whatsapp', label: 'WhatsApp Direct', desc: 'Instant lead alerts on mobile' }
+               ].map(item => (
+                  <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50/50 hover:bg-[#FFF5F7] transition-all group border border-transparent hover:border-rose-100">
+                     <div>
+                        <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{item.label}</p>
+                        <p className="text-[9px] font-bold text-slate-400 mt-0.5">{item.desc}</p>
+                     </div>
+                     <button 
+                       onClick={() => toggleSetting('notifications', item.id)}
+                       className={`w-10 h-5 rounded-full relative transition-all duration-300 ${
+                         settings.notifications[item.id] ? 'bg-[#9D174D]' : 'bg-slate-200'
+                       }`}
+                     >
+                       <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all duration-300 ${
+                         settings.notifications[item.id] ? 'left-5.5' : 'left-0.5'
+                       }`}></div>
+                     </button>
                   </div>
-                ))}
-              </div>
+               ))}
             </div>
           )}
 
           {activeTab === 'privacy' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-4">Privacy & Visibility</h3>
-              <div className="space-y-3">
-                {[
-                  { id: 'profilePublic', label: 'Public Profile Visibility', desc: 'Make your business profile visible to all potential customers.' },
-                  { id: 'showPricing', label: 'Show Starting Prices', desc: 'Display your base prices on the listing cards.' },
-                  { id: 'showContact', label: 'Direct Contact Access', desc: 'Allow verified users to see your phone number directly.' }
-                ].map(item => (
-                  <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 border border-slate-100 transition-all hover:bg-white">
-                    <div className="pr-4">
-                      <p className="text-sm font-bold text-slate-700">{item.label}</p>
-                      <p className="text-[11px] text-slate-500 font-medium mt-0.5">{item.desc}</p>
-                    </div>
-                    <button 
-                      onClick={() => togglePrivacy(item.id)}
-                      className={`w-12 h-6 rounded-full relative transition-all duration-300 ${
-                        settings.privacy[item.id] ? 'bg-[#ed648f]' : 'bg-slate-200'
-                      }`}
-                    >
-                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${
-                        settings.privacy[item.id] ? 'left-7' : 'left-1'
-                      }`}></div>
-                    </button>
+            <div className="vendor-surface rounded-2xl p-5 bg-white border border-rose-50 shadow-sm space-y-2 animate-in fade-in duration-300">
+               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Privacy & Visibility</h3>
+               {[
+                  { id: 'profilePublic', label: 'Public Visibility', desc: 'Show your profile in search results' },
+                  { id: 'showPricing', label: 'Price Transparency', desc: 'Show starting prices to clients' }
+               ].map(item => (
+                  <div key={item.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50/50 hover:bg-[#FFF5F7] transition-all border border-transparent hover:border-rose-100">
+                     <div>
+                        <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{item.label}</p>
+                        <p className="text-[9px] font-bold text-slate-400 mt-0.5">{item.desc}</p>
+                     </div>
+                     <button 
+                       onClick={() => toggleSetting('privacy', item.id)}
+                       className={`w-10 h-5 rounded-full relative transition-all duration-300 ${
+                         settings.privacy[item.id] ? 'bg-[#9D174D]' : 'bg-slate-200'
+                       }`}
+                     >
+                       <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all duration-300 ${
+                         settings.privacy[item.id] ? 'left-5.5' : 'left-0.5'
+                       }`}></div>
+                     </button>
                   </div>
-                ))}
-              </div>
+               ))}
             </div>
           )}
 
           {activeTab === 'security' && (
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Security Settings</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
-                    <div>
-                      <p className="text-sm font-bold text-slate-700">Account Password</p>
-                      <p className="text-xs text-slate-500 font-medium">Last changed 3 months ago.</p>
-                    </div>
-                    <button 
-                      onClick={() => openModal('password')}
-                      className="px-4 py-2 rounded-xl border border-[#ed648f20] text-[#ed648f] text-xs font-bold hover:bg-[#ed648f] hover:text-white transition-all"
-                    >
-                      Update Password
-                    </button>
+            <div className="space-y-4 animate-in fade-in duration-300">
+               <div className="vendor-surface rounded-2xl p-5 bg-white border border-rose-50 shadow-sm">
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Security Access</h3>
+                  <div className="space-y-2">
+                     <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50/50">
+                        <div>
+                           <p className="text-xs font-black text-slate-900 uppercase tracking-tight">Account Password</p>
+                           <p className="text-[9px] font-bold text-slate-400">Last updated 90 days ago</p>
+                        </div>
+                        <button className="text-[9px] font-black text-[#9D174D] uppercase tracking-widest bg-white px-4 py-2 rounded-lg shadow-sm border border-rose-50 hover:bg-[#9D174D] hover:text-white transition-all">Change</button>
+                     </div>
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
-                    <div>
-                      <p className="text-sm font-bold text-slate-700">Two-Factor Authentication</p>
-                      <p className="text-xs text-slate-500 font-medium">Add an extra layer of security to your account.</p>
-                    </div>
-                    <button className="px-4 py-2 rounded-xl bg-slate-100 text-slate-400 text-xs font-bold cursor-not-allowed">
-                      Enable 2FA
-                    </button>
-                  </div>
-                </div>
-              </div>
+               </div>
 
-              <div className="pt-8 border-t border-rose-50">
-                <h3 className="text-lg font-bold text-rose-600 mb-4">Danger Zone</h3>
-                <div className="p-5 rounded-2xl bg-rose-50/50 border border-rose-100 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-bold text-rose-900">Delete Vendor Account</p>
-                    <p className="text-xs text-rose-500 font-medium max-w-md">Once deleted, your portfolio, leads, and reviews will be permanently removed.</p>
+               <div className="vendor-surface rounded-2xl p-5 bg-[#FFF1F2] border border-rose-100 shadow-sm">
+                  <h3 className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-4">Danger Zone</h3>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-white/60 border border-white">
+                     <div>
+                        <p className="text-xs font-black text-rose-900 uppercase tracking-tight">Delete Account</p>
+                        <p className="text-[9px] font-bold text-rose-400 mt-0.5">Permanently remove all business data</p>
+                     </div>
+                     <button className="text-[9px] font-black text-white uppercase tracking-widest bg-rose-600 px-4 py-2 rounded-lg shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all">Terminate</button>
                   </div>
-                  <button 
-                    onClick={() => openModal('delete')}
-                    className="px-5 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-all shadow-md shadow-rose-200"
-                  >
-                    Delete Account
-                  </button>
-                </div>
-              </div>
+               </div>
             </div>
           )}
+
         </div>
       </div>
-
-      {/* Settings Modals */}
-      {showModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{
-          background: 'rgba(15, 23, 42, 0.4)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)'
-        }}>
-          <div className="w-full max-w-md rounded-[2rem] p-6 sm:p-8 bg-white shadow-2xl animate-in zoom-in-95 duration-200">
-            {modalType === 'password' && (
-              <div className="space-y-6">
-                <div className="text-center">
-                  <div className="h-14 w-14 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-4">
-                    <Icon name="mail" size="lg" color="#ed648f" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900">Update Password</h3>
-                  <p className="text-sm text-slate-500 font-medium mt-1">Protect your account with a strong password.</p>
-                </div>
-                <div className="space-y-4">
-                  <input type="password" placeholder="Current Password" className="w-full rounded-xl px-4 py-3 bg-slate-50 border border-slate-100 text-sm font-semibold outline-none focus:border-[#ed648f20] transition-all" />
-                  <input type="password" placeholder="New Password" className="w-full rounded-xl px-4 py-3 bg-slate-50 border border-slate-100 text-sm font-semibold outline-none focus:border-[#ed648f20] transition-all" />
-                  <input type="password" placeholder="Confirm New Password" className="w-full rounded-xl px-4 py-3 bg-slate-50 border border-slate-100 text-sm font-semibold outline-none focus:border-[#ed648f20] transition-all" />
-                </div>
-                <div className="flex gap-3 pt-2">
-                  <button onClick={() => setShowModal(false)} className="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-all">Cancel</button>
-                  <button className="flex-1 py-3 rounded-xl bg-[#ed648f] text-white font-bold shadow-lg shadow-[#ed648f30]">Save Changes</button>
-                </div>
-              </div>
-            )}
-
-            {modalType === 'delete' && (
-              <div className="space-y-6 text-center">
-                <div className="h-16 w-16 rounded-full bg-rose-50 flex items-center justify-center mx-auto mb-4">
-                  <Icon name="logout" size="lg" color="#e11d48" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900">Are you absolutely sure?</h3>
-                  <p className="text-sm text-slate-500 font-medium mt-2 leading-relaxed">
-                    This action cannot be undone. All your business data, reviews, and portfolio items will be permanently erased.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 pt-2">
-                  <button className="w-full py-3.5 rounded-2xl bg-rose-600 text-white font-bold shadow-xl shadow-rose-200 hover:bg-rose-700 transition-all">Yes, Delete Account</button>
-                  <button onClick={() => setShowModal(false)} className="w-full py-3 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 transition-all">I'll Stay</button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

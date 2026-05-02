@@ -25,68 +25,82 @@ const VendorEarnings = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-7 relative overflow-hidden">
-        <div className="absolute -top-20 -right-20 w-44 h-44 rounded-full opacity-15" style={{
-          background: 'radial-gradient(circle, #a855f7, transparent 70%)'
+    <div className="space-y-3 sm:space-y-4 max-w-7xl mx-auto">
+      {/* Compact Header */}
+      <div className="vendor-surface rounded-xl p-4 sm:p-5 relative overflow-hidden bg-[#FDF2F8] border border-rose-100 shadow-sm">
+        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-10" style={{
+          background: 'radial-gradient(circle, #ed648f, transparent 70%)'
         }}></div>
-        <div className="relative z-10">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#D28A8C' }}>Payments</p>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1">Earnings summary</h2>
-          <p className="text-xs sm:text-sm font-medium" style={{ color: '#94a3b8' }}>Track payouts, advances, and platform commissions.</p>
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#ed648f]">Financials</p>
+            <h2 className="text-lg font-black text-slate-900 mt-0.5 tracking-tight">Earnings Summary</h2>
+          </div>
+          <div className="h-9 w-9 rounded-xl bg-white flex items-center justify-center text-rose-500 shadow-sm border border-rose-50">
+             <Icon name="money" size="xs" />
+          </div>
         </div>
       </div>
 
-      {/* Earnings Stats */}
-      <div className="grid gap-2.5 sm:gap-4 grid-cols-2 lg:grid-cols-3">
+      {/* High Density Stats Grid */}
+      <div className="grid gap-3 sm:grid-cols-3">
         {[
-          { label: 'Total earnings', value: `₹${earnings.totalEarnings.toLocaleString()}`, sub: '+18% this quarter', icon: 'money', gradient: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)' },
-          { label: 'Pending payments', value: `₹${earnings.pendingPayments.toLocaleString()}`, sub: 'From confirmed bookings', icon: 'clock', gradient: 'linear-gradient(135deg, #fffbeb, #fef3c7)' },
-          { label: 'Platform commission', value: `₹${earnings.platformCommission.toLocaleString()}`, sub: 'Calculated at 10%', icon: 'chart', gradient: 'linear-gradient(135deg, #f5f3ff, #ede9fe)' }
+          { label: 'Total Earnings', value: `₹${earnings.totalEarnings.toLocaleString()}`, sub: '+18% growth', icon: 'money', bg: '#FFF1F2', text: '#E11D48' },
+          { label: 'Pending Payout', value: `₹${earnings.pendingPayments.toLocaleString()}`, sub: 'Next 48h', icon: 'clock', bg: '#FFFBEB', text: '#D97706' },
+          { label: 'Commission', value: `₹${earnings.platformCommission.toLocaleString()}`, sub: '10% Flat', icon: 'chart', bg: '#F5F3FF', text: '#7C3AED' }
         ].map((stat) => (
-          <div key={stat.label} className="vendor-surface rounded-2xl sm:rounded-3xl p-3 sm:p-4 lg:p-6 group cursor-default">
-            <div className="flex items-start justify-between gap-1">
-              <div className="min-w-0 flex-1">
-                <p className="text-[9px] sm:text-[10px] lg:text-xs font-semibold uppercase tracking-widest truncate" style={{ color: '#94a3b8' }}>{stat.label}</p>
-                <h3 className="text-base sm:text-xl lg:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1 lg:mt-2 tracking-tight truncate">{stat.value}</h3>
-                <p className="text-[9px] lg:text-xs font-semibold mt-0.5 sm:mt-1 lg:mt-1.5 truncate" style={{ color: '#D28A8C' }}>{stat.sub}</p>
+          <div key={stat.label} className="vendor-surface rounded-2xl p-4 border border-black/5 shadow-sm transition-all hover:scale-[1.01]" style={{ backgroundColor: stat.bg }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="h-8 w-8 rounded-lg bg-white/60 flex items-center justify-center shadow-sm" style={{ color: stat.text }}>
+                <Icon name={stat.icon} size="xs" />
               </div>
-              <div className="h-7 w-7 sm:h-10 sm:w-10 lg:h-12 lg:w-12 rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center flex-shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6" style={{ background: stat.gradient, color: '#A35E60' }}>
-                <Icon name={stat.icon} size="sm" color="current" />
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-900/20">Active</span>
+            </div>
+            <div>
+              <p className="text-[9px] font-black text-slate-900/40 uppercase tracking-widest mb-0.5">{stat.label}</p>
+              <h3 className="text-xl font-black text-slate-900 tracking-tighter">{stat.value}</h3>
+              <div className="mt-2 flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tight">{stat.sub}</p>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Payout Schedule */}
-      <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-7">
-        <div className="flex items-center gap-2 mb-3 sm:mb-5">
-          <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl flex items-center justify-center" style={{
-            background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)'
-          }}>
-            <Icon name="calendar" size="xs" color="#A35E60" />
-          </div>
-          <h3 className="text-base sm:text-lg font-semibold text-slate-900">Payout schedule</h3>
-        </div>
-        <div className="space-y-2 sm:space-y-3">
-          {['Advance payment - Apr 15', 'Final settlement - May 20', 'Bonus payout - Jun 05'].map((item, i) => (
-            <div key={item} className="flex items-center justify-between rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all hover:scale-[1.01]" style={{
-              background: 'linear-gradient(135deg, rgba(253,242,248,0.5), rgba(245,243,255,0.5))',
-              border: '1px solid rgba(210, 138, 140, 0.06)'
-            }}>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl flex items-center justify-center text-[11px] sm:text-xs font-semibold" style={{
-                  background: 'linear-gradient(135deg, #D28A8C, #C27A7C)',
-                  color: 'white'
-                }}>{i + 1}</div>
-                <span className="text-xs sm:text-sm font-semibold text-slate-700">{item}</span>
+      {/* Compact Payout Schedule */}
+      <div className="vendor-surface rounded-2xl p-4 sm:p-5 bg-[#F0F9FF] border border-blue-100 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+           <div className="flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-white flex items-center justify-center text-blue-500 shadow-sm">
+                <Icon name="calendar" size="xs" />
               </div>
-              <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full" style={{
-                background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)',
-                color: '#15803d'
-              }}>Scheduled</span>
+              <h3 className="text-xs font-black text-slate-900 uppercase tracking-tight">Payout Schedule</h3>
+           </div>
+           <button className="text-[9px] font-black text-blue-600 uppercase tracking-widest bg-white/40 px-3 py-1 rounded-lg border border-blue-50 hover:bg-white transition-all">History</button>
+        </div>
+        
+        <div className="space-y-2">
+          {[
+            { title: 'Advance Payment', date: 'Apr 15', amount: '₹12,450', status: 'Completed' },
+            { title: 'Final Settlement', date: 'May 20', amount: '₹45,000', status: 'Scheduled' }
+          ].map((item, i) => (
+            <div key={i} className="flex items-center justify-between bg-white/40 rounded-xl p-3 border border-blue-50 transition-all hover:bg-white/60">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-blue-500 text-white flex items-center justify-center text-[10px] font-black shadow-md shadow-blue-100">
+                  {i + 1}
+                </div>
+                <div>
+                   <span className="text-xs font-black text-slate-900 uppercase tracking-tight block leading-none">{item.title}</span>
+                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">{item.date}</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                 <span className="text-sm font-black text-slate-900 tracking-tight">{item.amount}</span>
+                 <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border ${item.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
+                    {item.status}
+                 </span>
+              </div>
             </div>
           ))}
         </div>

@@ -4,6 +4,7 @@ import Icon from '../../../components/ui/Icon';
 import VendorSidebar from './VendorSidebar';
 import VendorTopbar from './VendorTopbar';
 import VendorBottomNav from './VendorBottomNav';
+import VendorChatbot from './VendorChatbot';
 import { useVendorState } from '../useVendorState';
 
 const VendorLayout = () => {
@@ -12,7 +13,6 @@ const VendorLayout = () => {
   const { vendorState, loading } = useVendorState();
 
   useEffect(() => {
-    // Check if vendor has an active subscription after data is fully loaded from backend
     if (!loading && vendorState._id && vendorState.subscription?.status !== 'Active') {
       navigate('/vendor/onboarding/subscription');
     }
@@ -23,16 +23,43 @@ const VendorLayout = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ed648f]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9D174D]"></div>
       </div>
     );
   }
 
   return (
-    <div className="vendor-shell min-h-screen relative overflow-hidden">
-      {/* Decorative Background Blobs */}
-      <div className="decor-blob decor-blob-1"></div>
-      <div className="decor-blob decor-blob-2"></div>
+    <div className="vendor-shell min-h-screen relative overflow-x-hidden">
+      {/* Animated Movable Gradient Background */}
+      <style>{`
+        @keyframes move-gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .animated-bg {
+          background: linear-gradient(-45deg, #F8FAFC, #F1F5F9, #F8FAFC, #EFF6FF);
+          background-size: 400% 400%;
+          animation: move-gradient 15s ease infinite;
+        }
+        .decor-blob {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(80px);
+          z-index: 0;
+          animation: blob-move 20s infinite alternate;
+        }
+        @keyframes blob-move {
+          from { transform: translate(0, 0) scale(1); }
+          to { transform: translate(100px, 50px) scale(1.2); }
+        }
+      `}</style>
+
+      <div className="fixed inset-0 animated-bg z-0"></div>
+
+      {/* Decorative Movable Blobs */}
+      <div className="decor-blob w-[500px] h-[500px] bg-slate-200/20 -top-48 -left-48"></div>
+      <div className="decor-blob w-[400px] h-[400px] bg-slate-100/30 -bottom-24 -right-24" style={{ animationDelay: '-5s' }}></div>
 
       <div className="flex min-h-screen relative z-10">
         <div className="hidden lg:block w-72 lg:static">
@@ -40,44 +67,27 @@ const VendorLayout = () => {
         </div>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <div className="px-2 pt-2 lg:px-4 lg:pt-3">
+          <div className="px-3 pt-2 lg:px-4 lg:pt-3">
             <VendorTopbar notifications={vendorState.notifications} />
           </div>
 
-          <main className="flex-1 px-2 py-2 lg:px-4 lg:py-3 mb-24 lg:mb-0">
+          <main className="flex-1 px-3 py-3 lg:px-8 lg:py-6 mb-20 lg:mb-0">
             {!isApproved ? (
-              <div className="h-full flex items-center justify-center min-h-[70vh]">
-                <div className="max-w-md w-full bg-white/80 backdrop-blur-xl p-10 rounded-[3rem] border border-white shadow-2xl text-center space-y-6 animate-in fade-in zoom-in duration-700">
+              <div className="h-full flex items-center justify-center min-h-[70vh] p-4">
+                <div className="max-w-md w-full bg-white/80 backdrop-blur-xl p-8 sm:p-10 rounded-[2.5rem] border border-white shadow-2xl text-center space-y-6">
                   <div className="relative inline-block">
-                    <div className="h-24 w-24 rounded-3xl bg-primary-50 flex items-center justify-center mx-auto relative overflow-hidden">
-                      <Icon name="shield" size="lg" color="#ed648f" />
-                      <div className="absolute inset-0 bg-primary-400/10 animate-pulse"></div>
-                    </div>
-                    <div className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-amber-400 text-white flex items-center justify-center shadow-lg animate-bounce">
-                      <Icon name="clock" size="xs" color="current" />
+                    <div className="h-20 w-20 rounded-3xl bg-slate-50 flex items-center justify-center mx-auto relative overflow-hidden">
+                      <Icon name="shield" size="lg" color="#9D174D" />
+                      <div className="absolute inset-0 bg-slate-400/10 animate-pulse"></div>
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Account Under Review</h2>
-                    <p className="text-sm font-bold text-slate-500 leading-relaxed">
-                      Our admin team is currently verifying your profile and documents. You will get full access once approved.
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none uppercase">Under Review</h2>
+                    <p className="text-xs font-bold text-slate-400 leading-relaxed">
+                      Verifying your profile. You'll get access once approved.
                     </p>
                   </div>
-
-                  <div className="pt-4">
-                    <div className="flex items-center justify-center gap-2 text-[10px] font-black text-primary-400 uppercase tracking-[0.2em] bg-primary-50 py-3 px-6 rounded-2xl border border-primary-100">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-400"></span>
-                      </span>
-                      Verification in Progress
-                    </div>
-                  </div>
-
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-4">
-                    Need help? Contact support@utsavchakra.com
-                  </p>
                 </div>
               </div>
             ) : (
@@ -86,7 +96,13 @@ const VendorLayout = () => {
           </main>
         </div>
       </div>
-      <VendorBottomNav isApproved={isApproved} />
+      
+      {/* Global AI Chatbot */}
+      <VendorChatbot />
+
+      <div className="lg:hidden">
+         <VendorBottomNav isApproved={isApproved} />
+      </div>
     </div>
   );
 };

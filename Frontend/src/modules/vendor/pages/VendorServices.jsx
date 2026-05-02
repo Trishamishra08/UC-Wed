@@ -5,7 +5,6 @@ import Icon from '../../../components/ui/Icon';
 const VendorServices = () => {
   const { vendorState, updateVendorState } = useVendorState();
   const [showModal, setShowModal] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(false);
   const [newService, setNewService] = useState({
     name: '',
     category: '',
@@ -48,22 +47,33 @@ const VendorServices = () => {
     setNewService({ name: '', category: '', basePrice: '', inclusions: ['', ''] });
   };
 
+  const getServiceColor = (index) => {
+    const colors = [
+      { bg: '#FFF1F2', border: '#FFE4E6', text: '#E11D48' }, // Rose
+      { bg: '#F0F9FF', border: '#E0F2FE', text: '#0284C7' }, // Sky
+      { bg: '#F5F3FF', border: '#EDE9FE', text: '#7C3AED' }, // Purple
+      { bg: '#FFFBEB', border: '#FEF3C7', text: '#D97706' }, // Amber
+      { bg: '#F0FDF4', border: '#DCFCE7', text: '#16A34A' }  // Emerald
+    ];
+    return colors[index % colors.length];
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-7 relative overflow-hidden">
+      {/* Header - Solid Pastel Rose */}
+      <div className="vendor-surface rounded-xl p-3 sm:p-5 relative overflow-hidden bg-[#FDF2F8] border border-rose-100">
         <div className="absolute -top-20 -right-20 w-44 h-44 rounded-full opacity-15" style={{
           background: 'radial-gradient(circle, #ed648f, transparent 70%)'
         }}></div>
         <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 relative z-10">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#ed648f' }}>Services</p>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1">Service listings</h2>
-            <p className="text-xs sm:text-sm font-medium" style={{ color: '#94a3b8' }}>Showcase the services and packages you provide.</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed648f]">Catalogue</p>
+            <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-0.5">Service Management</h2>
+            <p className="text-[11px] sm:text-xs font-bold text-slate-500 mt-0.5">Organize your offerings into premium listings.</p>
           </div>
           <button 
             type="button" 
-            className="vendor-cta rounded-xl sm:rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 text-[11px] sm:text-xs font-semibold tracking-wide flex items-center gap-1.5 sm:gap-2"
+            className="vendor-cta rounded-lg px-5 py-2.5 text-[11px] sm:text-xs font-black uppercase tracking-widest active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-rose-200"
             onClick={() => setShowModal(true)}
           >
             <Icon name="plus" size="xs" /> Add service
@@ -71,196 +81,135 @@ const VendorServices = () => {
         </div>
       </div>
 
-      {/* Add Service Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 overflow-hidden" style={{
-          background: 'rgba(15, 23, 42, 0.4)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)'
-        }}>
-          <div className="w-full max-w-xl rounded-[1.5rem] p-4 sm:p-6 shadow-2xl relative my-auto" style={{
-            background: 'linear-gradient(180deg, #ffffff 0%, #FAF2F2 100%)',
-            border: '1px solid rgba(210, 138, 140, 0.1)'
-          }}>
-            <div className="flex items-center justify-between mb-4 sm:mb-5">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 leading-none">Add New Service</h3>
-                <p className="text-[11px] font-medium mt-1" style={{ color: '#94a3b8' }}>Create a new service listing.</p>
-              </div>
-              <button 
-                onClick={() => setShowModal(false)} 
-                className="h-8 w-8 flex items-center justify-center rounded-full text-slate-400 hover:text-rose-500 transition-all active:scale-90"
-                style={{ background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)' }}
-              >
-                <Icon name="close" size="xs" color="current" />
-              </button>
-            </div>
-
-            <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1 no-scrollbar">
-              <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-semibold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Service Name</label>
-                  <input 
-                    className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold transition-all"
-                    style={{
-                      border: '1px solid rgba(237, 100, 143, 0.12)',
-                      background: 'rgba(253, 242, 248, 0.25)'
-                    }}
-                    placeholder="e.g. Royal Stage Decor"
-                    value={newService.name}
-                    onChange={(e) => setNewService({...newService, name: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-semibold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Category</label>
-                  <div className="relative">
-                    <div 
-                      className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold border transition-all cursor-pointer flex items-center justify-between gap-2 shadow-sm"
-                      style={{
-                        borderColor: 'rgba(237, 100, 143, 0.2)',
-                        background: 'rgba(253, 242, 248, 0.25)',
-                        color: '#ed648f'
-                      }}
-                      onClick={() => setOpenDropdown(!openDropdown)}
-                    >
-                      {newService.category || 'Select Category'}
-                      <Icon name="chevronDown" size="xs" color="#ed648f" className={`transition-transform duration-300 ${openDropdown ? 'rotate-180' : ''}`} />
-                    </div>
-
-                    {/* Custom Dropdown Menu */}
-                    {openDropdown && (
-                      <>
-                        <div className="fixed inset-0 z-[90]" onClick={() => setOpenDropdown(false)}></div>
-                        <div className="absolute left-0 top-full mt-1.5 w-full bg-white rounded-xl shadow-2xl border border-[#ed648f20] transition-all z-[100] overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200">
-                          {['Decoration', 'Photography', 'Catering', 'Venue'].map((cat) => (
-                            <div
-                              key={cat}
-                              className={`px-4 py-2.5 text-sm font-bold cursor-pointer transition-colors flex items-center gap-3 ${
-                                newService.category === cat ? 'bg-[#ed648f10] text-[#ed648f]' : 'text-slate-600 hover:bg-[#ed648f08] hover:text-[#ed648f]'
-                              }`}
-                              onClick={() => {
-                                setNewService({...newService, category: cat});
-                                setOpenDropdown(false);
-                              }}
-                            >
-                              <div className={`w-1.5 h-1.5 rounded-full transition-all ${newService.category === cat ? 'bg-[#ed648f] scale-100' : 'bg-transparent scale-0'}`}></div>
-                              {cat}
-                            </div>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Starting Price (₹)</label>
-                <input 
-                  type="number"
-                  className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold transition-all"
-                  style={{
-                    border: '1px solid rgba(237, 100, 143, 0.12)',
-                    background: 'rgba(253, 242, 248, 0.25)'
-                  }}
-                  placeholder="e.g. 50000"
-                  value={newService.basePrice}
-                  onChange={(e) => setNewService({...newService, basePrice: e.target.value})}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Key Inclusions</p>
-                <div className="space-y-2">
-                  {newService.inclusions.map((inc, idx) => (
-                    <input 
-                      key={idx}
-                      placeholder={`Service Feature ${idx + 1}`}
-                      className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-medium transition-all outline-none"
-                      style={{
-                        border: '1px solid rgba(237, 100, 143, 0.12)',
-                        background: 'rgba(253, 242, 248, 0.2)'
-                      }}
-                      value={inc}
-                      onChange={(e) => {
-                        const incs = [...newService.inclusions];
-                        incs[idx] = e.target.value;
-                        setNewService({...newService, inclusions: incs});
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <button 
-                className="vendor-cta w-full rounded-xl py-3.5 font-semibold text-sm sm:text-base mt-2 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-                onClick={handleSave}
-              >
-                <Icon name="sparkles" size="xs" /> Save Listing
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Service Cards */}
-      <div className="grid gap-3 sm:gap-5 lg:grid-cols-2">
-        {vendorState.services.map((service, i) => (
-          <div key={service.id} className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-6 group relative overflow-hidden" style={{ animationDelay: `${i * 0.08}s` }}>
-            <div className="absolute -top-12 -right-12 w-28 h-28 rounded-full opacity-10 group-hover:opacity-20 transition-opacity" style={{
-              background: 'radial-gradient(circle, #ed648f, transparent 70%)'
-            }}></div>
-            
-            <div className="flex items-start justify-between relative z-10">
-              <div className="flex items-start gap-2.5 sm:gap-3">
-                <div className="h-9 w-9 sm:h-11 sm:w-11 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0" style={{
-                  background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)',
-                  color: '#ed648f'
-                }}>
-                  {service.category === 'Decoration' ? <Icon name="palette" size="sm" /> : 
-                   service.category === 'Photography' ? <Icon name="camera" size="sm" /> : 
-                   service.category === 'Catering' ? <Icon name="party" size="sm" /> : <Icon name="building" size="sm" />}
-                </div>
-                <div>
-                  <h3 className="text-sm sm:text-lg font-semibold text-slate-900">{service.name}</h3>
-                  <p className="text-xs sm:text-sm font-semibold mt-0.5" style={{ color: '#ed648f' }}>Starting at ₹{service.basePrice.toLocaleString()}</p>
-                </div>
-              </div>
-              <span className="rounded-full px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider" style={{
-                background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)',
-                color: '#ed648f'
-              }}>{service.category}</span>
-            </div>
-            
-            <div className="mt-3 sm:mt-5 relative z-10">
-              <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider mb-1.5 sm:mb-2" style={{ color: '#94a3b8' }}>Packages</p>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {service.packages.map((pkg) => (
-                  <span key={pkg.name} className="rounded-xl sm:rounded-2xl px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold" style={{
-                    background: 'rgba(253, 242, 248, 0.5)',
-                    border: '1px solid rgba(237, 100, 143, 0.08)',
-                    color: '#475569'
-                  }}>
-                    {pkg.name} • ₹{pkg.price.toLocaleString()}
-                  </span>
-                ))}
-              </div>
-            </div>
-            
-            <div className="mt-3 sm:mt-4 relative z-10">
-              <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider mb-1.5 sm:mb-2" style={{ color: '#94a3b8' }}>Inclusions</p>
-              <ul className="text-xs sm:text-sm font-medium space-y-0.5 sm:space-y-1" style={{ color: '#64748b' }}>
-                {service.inclusions.map((item) => (
-                  <li key={item} className="flex items-center gap-1.5 sm:gap-2">
-                    <span className="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#ed648f' }}></span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+      {/* Stats Row - Soft Pastel */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'Services', value: vendorState.services.length, bg: '#F0F9FF', border: '#E0F2FE' },
+          { label: 'Rating', value: '4.9 ⭐', bg: '#FFFBEB', border: '#FEF3C7' },
+          { label: 'Visibility', value: 'High', bg: '#F0FDF4', border: '#DCFCE7' }
+        ].map((stat, i) => (
+          <div key={i} className="vendor-surface rounded-xl p-2 sm:p-3 border shadow-none flex flex-col items-center justify-center text-center transition-all hover:scale-[1.02]" style={{ background: stat.bg, borderColor: stat.border }}>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">{stat.label}</p>
+            <p className="text-xs sm:text-sm font-black text-slate-900 tracking-tight">{stat.value}</p>
           </div>
         ))}
       </div>
+
+      {/* Service Grid - Solid Pastel Cards */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {vendorState.services.map((service, i) => {
+          const theme = getServiceColor(i);
+          return (
+            <div key={service.id} className="vendor-surface rounded-2xl p-5 relative overflow-hidden transition-all hover:shadow-md border" style={{ backgroundColor: theme.bg, borderColor: theme.border }}>
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-white/60 flex items-center justify-center shadow-sm" style={{ color: theme.text }}>
+                    {service.category === 'Decoration' ? <Icon name="palette" size="sm" /> : 
+                     service.category === 'Photography' ? <Icon name="camera" size="sm" /> : 
+                     service.category === 'Catering' ? <Icon name="party" size="sm" /> : <Icon name="building" size="sm" />}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">{service.name}</h3>
+                    <p className="text-[10px] font-black uppercase tracking-widest mt-0.5" style={{ color: theme.text }}>{service.category}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                   <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest">Starting Price</p>
+                   <p className="text-sm font-black text-slate-900 tracking-tight">₹{service.basePrice.toLocaleString()}</p>
+                </div>
+              </div>
+              
+              <div className="grid gap-4">
+                <div className="bg-white/40 rounded-xl p-3 border" style={{ borderColor: theme.border }}>
+                  <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest mb-2">Available Packages</p>
+                  <div className="flex flex-wrap gap-2">
+                    {service.packages.map((pkg) => (
+                      <div key={pkg.name} className="flex items-center gap-2 bg-white/60 rounded-lg px-2.5 py-1.5 border border-white/80 text-[10px] font-bold text-slate-700">
+                         <div className="h-1 w-1 rounded-full" style={{ backgroundColor: theme.text }}></div>
+                         {pkg.name} • <span style={{ color: theme.text }}>₹{pkg.price.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="px-1">
+                  <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest mb-2">Included Highlights</p>
+                  <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                    {service.inclusions.map((item) => (
+                      <li key={item} className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                        <Icon name="check" size="xs" color="#10b981" />
+                        <span className="truncate">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)}></div>
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 overflow-hidden animate-in fade-in zoom-in duration-300">
+             <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight">New Listing</h3>
+                  <p className="text-xs font-bold text-slate-500">Add a specialized service</p>
+                </div>
+                <button onClick={() => setShowModal(false)} className="h-8 w-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                  <Icon name="close" size="sm" />
+                </button>
+             </div>
+
+             <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Name</label>
+                    <input 
+                      className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black focus:outline-none focus:border-rose-400 transition-all"
+                      placeholder="e.g. Stage Decor"
+                      value={newService.name}
+                      onChange={(e) => setNewService({...newService, name: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Category</label>
+                    <select 
+                      className="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black focus:outline-none focus:border-rose-400"
+                      value={newService.category}
+                      onChange={(e) => setNewService({...newService, category: e.target.value})}
+                    >
+                      <option value="">Select</option>
+                      <option value="Decoration">Decoration</option>
+                      <option value="Photography">Photography</option>
+                      <option value="Catering">Catering</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Base Price (₹)</label>
+                  <input 
+                    type="number"
+                    className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black focus:outline-none focus:border-rose-400"
+                    placeholder="e.g. 50000"
+                    value={newService.basePrice}
+                    onChange={(e) => setNewService({...newService, basePrice: e.target.value})}
+                  />
+                </div>
+
+                <div className="pt-2">
+                   <button onClick={handleSave} className="w-full vendor-cta h-12 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-200">
+                      Create Service
+                   </button>
+                </div>
+             </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

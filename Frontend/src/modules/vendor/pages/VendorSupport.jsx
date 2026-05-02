@@ -1,180 +1,128 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Icon from '../../../components/ui/Icon';
-import { vendorApi } from '../vendorApi';
 
 const VendorSupport = () => {
-  const [tickets, setTickets] = useState([]);
-  const [showCreate, setShowCreate] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({
-    subject: '',
-    category: 'Technical',
-    message: '',
-    priority: 'Medium'
-  });
+  const [activeCategory, setActiveCategory] = useState('all');
 
-  useEffect(() => {
-    fetchTickets();
-  }, []);
+  const tickets = [
+    { id: 'TKT-9921', subject: 'Payout Delay - April', status: 'In-Progress', date: '2026-04-28', priority: 'High', category: 'Payments' },
+    { id: 'TKT-9845', subject: 'Profile Image Not Uploading', status: 'Resolved', date: '2026-04-20', priority: 'Medium', category: 'Technical' },
+  ];
 
-  const fetchTickets = async () => {
-    const token = localStorage.getItem('vendorToken');
-    const res = await vendorApi.getSupportTickets(token);
-    if (res.success) {
-      setTickets(res.data);
-    }
-    setLoading(false);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('vendorToken');
-    const res = await vendorApi.createSupportTicket(formData, token);
-    if (res.success) {
-      setTickets([res.data, ...tickets]);
-      setShowCreate(false);
-      setFormData({ subject: '', category: 'Technical', message: '', priority: 'Medium' });
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Open': return '#3b82f6';
-      case 'In-Progress': return '#f59e0b';
-      case 'Resolved': return '#10b981';
-      default: return '#64748b';
-    }
-  };
+  const categories = [
+    { id: 'all', label: 'All Tickets', icon: 'checkList' },
+    { id: 'payments', label: 'Payments', icon: 'money' },
+    { id: 'account', label: 'Account', icon: 'account' },
+    { id: 'leads', label: 'Leads', icon: 'leads' }
+  ];
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="vendor-surface rounded-3xl p-7 relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="relative z-10">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-rose-500">Support Center</p>
-          <h2 className="text-2xl font-bold text-slate-900 mt-1">Help & Assistance</h2>
-          <p className="text-sm font-medium text-slate-400">Get quick resolution for your queries from our expert team.</p>
+    <div className="space-y-4 sm:space-y-5 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* Compact Header */}
+      <div className="vendor-surface rounded-xl p-4 sm:p-5 relative overflow-hidden bg-white border border-slate-100 shadow-sm">
+        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-5 bg-[#9D174D]"></div>
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+             <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#9D174D] shadow-sm border border-white">
+                <Icon name="help" size="sm" />
+             </div>
+             <div>
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Help Desk</p>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none">Support Center</h2>
+             </div>
+          </div>
+          <button 
+            className="rounded-xl px-5 h-10 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-rose-100 active:scale-95 transition-all flex items-center gap-2"
+            style={{ background: 'linear-gradient(135deg, #9D174D, #831843)' }}
+          >
+             <Icon name="plus" size="xs" /> New Ticket
+          </button>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="relative z-10 px-6 py-3 rounded-2xl bg-rose-500 text-white font-bold shadow-lg shadow-rose-200 hover:scale-105 transition-all text-sm flex items-center gap-2"
-        >
-          <Icon name="edit" size="xs" />
-          New Ticket
-        </button>
       </div>
 
-      {/* List */}
-      <div className="vendor-surface rounded-3xl p-6 sm:p-8">
-        <h3 className="text-lg font-bold text-slate-800 mb-6">Recent Tickets</h3>
-
-        {loading ? (
-          <div className="text-center py-10">Loading Tickets...</div>
-        ) : tickets.length === 0 ? (
-          <div className="text-center py-16 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-            <Icon name="checkList" size="xl" color="#cbd5e1" />
-            <p className="mt-4 text-slate-400 font-bold">No active support tickets</p>
+      {/* Quick Access Grid - Added Background Colors */}
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+        {[
+          { label: 'Live Chat', sub: 'Instant Help', icon: 'chat', bg: '#F0F9FF', text: '#0369a1', border: '#e0f2fe' },
+          { label: 'Email Us', sub: '24h Response', icon: 'mail', bg: '#FDF2F8', text: '#9D174D', border: '#fce7f3' },
+          { label: 'Phone Help', sub: '10am - 6pm', icon: 'phone', bg: '#F0FDF4', text: '#15803d', border: '#dcfce7' },
+          { label: 'Docs', sub: 'Self Help', icon: 'book', bg: '#FFFBEB', text: '#b45309', border: '#fef3c7' }
+        ].map((item) => (
+          <div 
+            key={item.label} 
+            className="vendor-surface rounded-2xl p-4 border transition-all hover:translate-y-[-2px] cursor-pointer"
+            style={{ backgroundColor: item.bg, borderColor: item.border }}
+          >
+            <div className="h-8 w-8 rounded-lg mb-3 flex items-center justify-center shadow-sm bg-white" style={{ color: item.text }}>
+              <Icon name={item.icon} size="xs" />
+            </div>
+            <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-tight">{item.label}</h4>
+            <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-tighter">{item.sub}</p>
           </div>
-        ) : (
-          <div className="grid gap-4">
+        ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
+        
+        {/* Sidebar Filter */}
+        <div className="flex lg:flex-col gap-1.5 overflow-x-auto pb-1 lg:pb-0 no-scrollbar">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`flex items-center gap-3 px-4 h-11 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap lg:w-full border ${
+                activeCategory === cat.id 
+                  ? 'bg-[#9D174D] text-white border-[#9D174D] shadow-lg shadow-rose-100' 
+                  : 'bg-white text-slate-400 border-slate-100 hover:bg-slate-50 hover:text-[#9D174D]'
+              }`}
+            >
+              <Icon name={cat.icon} size="xs" />
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tickets List */}
+        <div className="vendor-surface rounded-2xl p-4 sm:p-5 bg-white border border-slate-100 shadow-sm space-y-3">
+          <div className="flex items-center justify-between mb-2">
+             <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Recent Tickets</h3>
+             <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">{tickets.length} Active</span>
+          </div>
+
+          <div className="space-y-2">
             {tickets.map(ticket => (
-              <div key={ticket._id} className="p-5 rounded-2xl bg-white border border-slate-100 hover:border-rose-100 transition-all group flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <h4 className="font-bold text-slate-800">{ticket.subject}</h4>
-                    <span className="text-[10px] font-bold px-2 py-1 rounded bg-slate-100 text-slate-500 uppercase tracking-tighter">
-                      #{ticket._id.slice(-6)}
-                    </span>
+              <div key={ticket.id} className="group flex flex-wrap items-center justify-between p-4 rounded-xl border border-slate-50 hover:border-slate-100 bg-slate-50/50 hover:bg-white transition-all cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <div className={`h-9 w-9 rounded-xl flex items-center justify-center text-[10px] font-black shadow-sm ${
+                    ticket.status === 'Resolved' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                  }`}>
+                    {ticket.status === 'Resolved' ? <Icon name="check" size="xs" /> : <Icon name="clock" size="xs" />}
                   </div>
-                  <div className="flex items-center gap-4 text-xs font-medium text-slate-400">
-                    <span className="flex items-center gap-1"><Icon name="clock" size="xs" /> {new Date(ticket.createdAt).toLocaleDateString()}</span>
-                    <span className="flex items-center gap-1"><Icon name="account" size="xs" /> {ticket.category}</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-slate-300 tracking-tighter">{ticket.id}</span>
+                      <h4 className="text-xs font-black text-slate-900 tracking-tight">{ticket.subject}</h4>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1.5">
+                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{ticket.date}</span>
+                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">•</span>
+                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{ticket.category}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex flex-col items-end">
-                    <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: getStatusColor(ticket.status) }}>{ticket.status}</span>
-                    <span className="text-[10px] font-medium text-slate-300">Priority: {ticket.priority}</span>
-                  </div>
-                  <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-rose-50 group-hover:text-rose-500 flex items-center justify-center transition-all">
-                    <Icon name="chevronDown" size="xs" />
-                  </button>
+                <div className="flex items-center gap-2 mt-3 sm:mt-0 w-full sm:w-auto justify-end">
+                   <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${
+                     ticket.priority === 'High' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
+                   }`}>{ticket.priority}</span>
+                   <Icon name="chevronRight" size="xs" className="text-slate-300 group-hover:text-[#9D174D] group-hover:translate-x-1 transition-all" />
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
-
-      {/* Create Modal */}
-      {showCreate && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <form onSubmit={handleSubmit} className="w-full max-w-lg bg-white rounded-[2.5rem] p-8 shadow-2xl flex flex-col gap-6 animate-in zoom-in-95 duration-200">
-            <div className="text-center">
-              <h3 className="text-2xl font-bold text-slate-900">Raise a Support Ticket</h3>
-              <p className="text-sm text-slate-400 font-medium">Please provide detailed information about your issue.</p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Category</label>
-                  <select
-                    value={formData.category}
-                    onChange={e => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-100 px-4 text-sm font-semibold outline-none focus:border-rose-200 transition-all"
-                  >
-                    <option>Technical</option>
-                    <option>Payments</option>
-                    <option>Profile</option>
-                    <option>Leads</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Priority</label>
-                  <select
-                    value={formData.priority}
-                    onChange={e => setFormData({ ...formData, priority: e.target.value })}
-                    className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-100 px-4 text-sm font-semibold outline-none focus:border-rose-200 transition-all"
-                  >
-                    <option>Low</option>
-                    <option>Medium</option>
-                    <option>High</option>
-                    <option>Urgent</option>
-                  </select>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Subject</label>
-                <input
-                  placeholder="Enter brief summary of issue"
-                  value={formData.subject}
-                  onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                  required
-                  className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-100 px-4 text-sm font-semibold outline-none focus:border-rose-200 transition-all"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Message</label>
-                <textarea
-                  rows="4"
-                  placeholder="Describe your concern in detail..."
-                  value={formData.message}
-                  onChange={e => setFormData({ ...formData, message: e.target.value })}
-                  required
-                  className="w-full rounded-2xl bg-slate-50 border border-slate-100 p-4 text-sm font-semibold outline-none focus:border-rose-200 transition-all resize-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-4 pt-2">
-              <button type="button" onClick={() => setShowCreate(false)} className="flex-1 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50 transition-all">Cancel</button>
-              <button type="submit" className="flex-2 py-4 px-8 rounded-2xl bg-rose-500 text-white font-bold shadow-xl shadow-rose-200 hover:scale-105 transition-all">Submit Ticket</button>
-            </div>
-          </form>
         </div>
-      )}
+
+      </div>
     </div>
   );
 };

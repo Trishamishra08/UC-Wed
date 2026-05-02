@@ -1,434 +1,229 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useVendorState } from '../useVendorState';
-import { computeProfileCompletion } from '../vendorStore';
 import Icon from '../../../components/ui/Icon';
 
 const VendorProfile = () => {
   const { vendorState, updateVendorState } = useVendorState();
-  const [showModal, setShowModal] = useState(false);
-  const [tempProfile, setTempProfile] = useState({
-    businessName: '',
-    category: '',
-    city: '',
-    years: '',
-    teamSize: '',
-    accountName: '',
-    accountNumber: '',
-    ifsc: '',
-    upiId: ''
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // Ensure we capture all existing data correctly
+  const [tempProfile, setTempProfile] = useState({ 
+    businessName: vendorState.profile?.businessName || '',
+    category: vendorState.profile?.category || '',
+    location: vendorState.profile?.location || '',
+    experience: vendorState.profile?.experience || '5 Years',
+    teamSize: vendorState.profile?.teamSize || '7 Max',
+    accName: vendorState.bankInfo?.accName || 'trisha',
+    accNo: vendorState.bankInfo?.accNo || '123456789012',
+    ifsc: vendorState.bankInfo?.ifsc || 'SBI1234567',
+    upiId: vendorState.bankInfo?.upiId || 'name@upi'
   });
 
-  // Prevent background scroll when modal is open
-  useEffect(() => {
-    if (showModal) {
-      document.body.style.overflow = 'hidden';
-      document.body.classList.add('modal-open');
-    } else {
-      document.body.style.overflow = 'unset';
-      document.body.classList.remove('modal-open');
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-      document.body.classList.remove('modal-open');
-    };
-  }, [showModal]);
-
-  const completion = computeProfileCompletion(vendorState);
-
-  const handleOpenModal = () => {
-    console.log('Opening profile edit modal');
-    setTempProfile({
-      businessName: vendorState?.registration?.businessName || '',
-      category: vendorState?.registration?.category || '',
-      city: vendorState?.registration?.city || '',
-      years: vendorState?.businessDetails?.years || '',
-      teamSize: vendorState?.businessDetails?.teamSize || '',
-      accountName: vendorState?.bank?.accountName || '',
-      accountNumber: vendorState?.bank?.accountNumber || '',
-      ifsc: vendorState?.bank?.ifsc || '',
-      upiId: vendorState?.bank?.upiId || ''
-    });
-    setShowModal(true);
-  };
-
   const handleSave = () => {
-    console.log('Saving profile changes:', tempProfile);
-    updateVendorState({
-      registration: {
-        ...(vendorState?.registration || {}),
+    updateVendorState({ 
+      profile: { 
         businessName: tempProfile.businessName,
         category: tempProfile.category,
-        city: tempProfile.city
-      },
-      businessDetails: {
-        ...(vendorState?.businessDetails || {}),
-        years: tempProfile.years,
+        location: tempProfile.location,
+        experience: tempProfile.experience,
         teamSize: tempProfile.teamSize
       },
-      bank: {
-        ...(vendorState?.bank || {}),
-        accountName: tempProfile.accountName,
-        accountNumber: tempProfile.accountNumber,
+      bankInfo: { 
+        accName: tempProfile.accName,
+        accNo: tempProfile.accNo,
         ifsc: tempProfile.ifsc,
         upiId: tempProfile.upiId
       }
     });
-    setShowModal(false);
+    setIsEditing(false);
+  };
+
+  const handleChange = (field, value) => {
+    setTempProfile(prev => ({ ...prev, [field]: value }));
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 pb-20 sm:pb-0">
       {/* Header */}
-      <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-7 relative overflow-hidden">
-        <div className="absolute -top-20 -right-20 w-44 h-44 rounded-full opacity-15" style={{
-          background: 'radial-gradient(circle, #D28A8C, transparent 70%)'
-        }}></div>
-        <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 relative z-10">
+      <div className="vendor-surface rounded-xl p-4 sm:p-6 relative overflow-hidden bg-white border border-rose-100 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#D28A8C' }}>Profile</p>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1">Vendor profile details</h2>
-            <p className="text-xs sm:text-sm font-medium" style={{ color: '#94a3b8' }}>Update business information and verification assets.</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed648f]">Management</p>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">Business Profile</h2>
+            <p className="text-xs font-bold text-slate-500 mt-1">Verified details & credentials</p>
           </div>
           <button 
-            type="button" 
-            className="vendor-cta rounded-xl sm:rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold tracking-wide active:scale-95 transition-all flex items-center gap-1.5 sm:gap-2"
-            onClick={handleOpenModal}
+            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+            className="vendor-cta rounded-xl px-6 py-3 text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-rose-100 active:scale-95 transition-all"
           >
-            <Icon name="edit" size="xs" /> Edit Profile
+            <Icon name={isEditing ? 'check' : 'edit'} size="xs" />
+            {isEditing ? 'Save Profile' : 'Edit Profile'}
           </button>
         </div>
       </div>
 
-      {/* Edit Modal (Ultra-Compact Version) */}
-      {showModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 overflow-hidden" style={{
-          background: 'rgba(15, 23, 42, 0.4)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)'
-        }}>
-          <div className="w-full max-w-xl rounded-[1.5rem] p-4 sm:p-6 shadow-2xl relative my-auto animate-in zoom-in-95 duration-200" style={{
-            background: 'linear-gradient(180deg, #ffffff 0%, #FAF2F2 100%)',
-            border: '1px solid rgba(210, 138, 140, 0.1)'
-          }}>
-            <div className="flex items-center justify-between mb-4 sm:mb-5">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 leading-none">Edit Profile</h3>
-                <p className="text-[11px] font-medium mt-1" style={{ color: '#94a3b8' }}>Update your business details quickly.</p>
+      {/* Main Grid - Restoring individual small cards with full data */}
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        
+        {/* Card 1: Business Overview - Rose */}
+        <div className="vendor-surface rounded-2xl p-5 relative overflow-hidden border border-rose-100/50 shadow-sm transition-all" style={{ backgroundColor: '#FFF1F2' }}>
+           <div className="flex items-center gap-3 mb-5">
+              <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-[#ed648f] shadow-sm">
+                 <Icon name="store" size="sm" />
               </div>
-              <button 
-                onClick={() => setShowModal(false)} 
-                className="h-8 w-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:text-rose-500 transition-all active:scale-90"
-                style={{ background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)' }}
-              >
-                <Icon name="close" size="xs" color="current" />
-              </button>
-            </div>
-
-            <div className="space-y-4 sm:space-y-5 max-h-[75vh] overflow-y-auto pr-2 no-scrollbar">
-              {/* Business Section */}
-              <div className="space-y-3 sm:space-y-4">
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.15em] pl-2.5" style={{
-                  color: '#D28A8C',
-                  borderLeft: '3px solid #D28A8C'
-                }}>Business Info</h4>
-                <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Name</label>
-                    <input 
-                      className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold transition-all"
-                      style={{
-                        border: '1px solid rgba(210, 138, 140, 0.12)',
-                        background: 'rgba(253, 242, 248, 0.25)'
-                      }}
-                      value={tempProfile.businessName}
-                      onChange={(e) => setTempProfile({...tempProfile, businessName: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Category</label>
-                    <input 
-                      className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold transition-all"
-                      style={{
-                        border: '1px solid rgba(210, 138, 140, 0.12)',
-                        background: 'rgba(253, 242, 248, 0.25)'
-                      }}
-                      value={tempProfile.category}
-                      onChange={(e) => setTempProfile({...tempProfile, category: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>City</label>
-                    <input 
-                      className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold transition-all"
-                      style={{
-                        border: '1px solid rgba(210, 138, 140, 0.12)',
-                        background: 'rgba(253, 242, 248, 0.25)'
-                      }}
-                      value={tempProfile.city}
-                      onChange={(e) => setTempProfile({...tempProfile, city: e.target.value})}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Exp.</label>
-                      <input 
-                        type="number"
-                        className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold transition-all"
-                        style={{
-                          border: '1px solid rgba(210, 138, 140, 0.12)',
-                          background: 'rgba(253, 242, 248, 0.25)'
-                        }}
-                        value={tempProfile.years}
-                        onChange={(e) => setTempProfile({...tempProfile, years: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Team Size</label>
-                      <input 
-                        type="number"
-                        className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold transition-all"
-                        style={{
-                          border: '1px solid rgba(210, 138, 140, 0.12)',
-                          background: 'rgba(253, 242, 248, 0.25)'
-                        }}
-                        value={tempProfile.teamSize}
-                        onChange={(e) => setTempProfile({...tempProfile, teamSize: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                </div>
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">Business Info</h3>
+           </div>
+           
+           <div className="space-y-4">
+              <div className="space-y-1">
+                 <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest">Business Name</p>
+                 {isEditing ? (
+                   <input className="w-full bg-white/60 border border-rose-200 rounded-lg px-3 py-1.5 text-xs font-black" value={tempProfile.businessName} onChange={(e) => handleChange('businessName', e.target.value)} />
+                 ) : (
+                   <p className="text-sm font-black text-slate-900 truncate">{tempProfile.businessName || 'Not Set'}</p>
+                 )}
               </div>
-
-              {/* Bank Section */}
-              <div className="space-y-3 sm:space-y-4">
-                <h4 className="text-[10px] font-bold uppercase tracking-[0.15em] pl-2.5" style={{
-                  color: '#D28A8C',
-                  borderLeft: '3px solid #D28A8C'
-                }}>Bank Details</h4>
-                <div className="grid gap-2.5 sm:gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Account Name</label>
-                    <input 
-                      className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold transition-all"
-                      style={{
-                        border: '1px solid rgba(210, 138, 140, 0.12)',
-                        background: 'rgba(253, 242, 248, 0.25)'
-                      }}
-                      value={tempProfile.accountName}
-                      onChange={(e) => setTempProfile({...tempProfile, accountName: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>Acc Number</label>
-                    <input 
-                      className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold transition-all"
-                      style={{
-                        border: '1px solid rgba(210, 138, 140, 0.12)',
-                        background: 'rgba(253, 242, 248, 0.25)'
-                      }}
-                      value={tempProfile.accountNumber}
-                      onChange={(e) => setTempProfile({...tempProfile, accountNumber: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>IFSC Code</label>
-                    <input 
-                      className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold transition-all"
-                      style={{
-                        border: '1px solid rgba(210, 138, 140, 0.12)',
-                        background: 'rgba(253, 242, 248, 0.25)'
-                      }}
-                      value={tempProfile.ifsc}
-                      onChange={(e) => setTempProfile({...tempProfile, ifsc: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider ml-1" style={{ color: '#94a3b8' }}>UPI ID</label>
-                    <input 
-                      className="w-full rounded-xl px-4 py-2 sm:py-2.5 text-sm font-semibold transition-all"
-                      style={{
-                        border: '1px solid rgba(210, 138, 140, 0.12)',
-                        background: 'rgba(253, 242, 248, 0.25)'
-                      }}
-                      value={tempProfile.upiId}
-                      onChange={(e) => setTempProfile({...tempProfile, upiId: e.target.value})}
-                    />
-                  </div>
-                </div>
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest">Category</p>
+                    {isEditing ? (
+                      <input className="w-full bg-white/60 border border-rose-200 rounded-lg px-3 py-1.5 text-xs font-black" value={tempProfile.category} onChange={(e) => handleChange('category', e.target.value)} />
+                    ) : (
+                      <p className="text-[11px] font-black text-slate-900 truncate">{tempProfile.category || 'Not Set'}</p>
+                    )}
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest">Location</p>
+                    {isEditing ? (
+                      <input className="w-full bg-white/60 border border-rose-200 rounded-lg px-3 py-1.5 text-xs font-black" value={tempProfile.location} onChange={(e) => handleChange('location', e.target.value)} />
+                    ) : (
+                      <p className="text-[11px] font-black text-slate-900 truncate">{tempProfile.location || 'Not Set'}</p>
+                    )}
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest">Experience</p>
+                    {isEditing ? (
+                      <input className="w-full bg-white/60 border border-rose-200 rounded-lg px-3 py-1.5 text-xs font-black" value={tempProfile.experience} onChange={(e) => handleChange('experience', e.target.value)} />
+                    ) : (
+                      <p className="text-[11px] font-black text-slate-900">{tempProfile.experience}</p>
+                    )}
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest">Team Size</p>
+                    {isEditing ? (
+                      <input className="w-full bg-white/60 border border-rose-200 rounded-lg px-3 py-1.5 text-xs font-black" value={tempProfile.teamSize} onChange={(e) => handleChange('teamSize', e.target.value)} />
+                    ) : (
+                      <p className="text-[11px] font-black text-slate-900">{tempProfile.teamSize}</p>
+                    )}
+                 </div>
               </div>
-
-              <button 
-                type="button"
-                className="vendor-cta w-full rounded-xl py-3.5 font-bold text-sm sm:text-base mt-2 flex items-center justify-center gap-2 active:scale-[0.98] transition-all uppercase tracking-widest"
-                onClick={handleSave}
-              >
-                💾 Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Business Overview + Profile Strength */}
-      <div className="grid gap-4 sm:gap-6 xl:grid-cols-[1.2fr_1fr]">
-        <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-            <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center" style={{
-              background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)'
-            }}>
-              <Icon name="briefcase" size="xs" color="currentColor" />
-            </div>
-            Business overview
-          </h3>
-          <div className="mt-3 sm:mt-4 grid gap-2.5 sm:gap-4 sm:grid-cols-2 text-sm">
-            {[
-              { label: 'Business Name', value: vendorState?.registration?.businessName || 'Emerald Studio' },
-              { label: 'Category', value: vendorState?.registration?.category || 'Decorator' },
-              { label: 'Location', value: vendorState?.registration?.city || 'Indore' }
-            ].map(item => (
-              <div key={item.label} className="space-y-0.5 p-2.5 sm:p-3.5 rounded-lg sm:rounded-xl transition-all hover:bg-white" style={{
-                background: 'rgba(253, 242, 248, 0.3)',
-                border: '1px solid rgba(210, 138, 140, 0.05)'
-              }}>
-                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest" style={{ color: '#94a3b8' }}>{item.label}</p>
-                <p className="font-semibold text-slate-900 text-xs sm:text-[15px]">{item.value}</p>
-              </div>
-            ))}
-            <div className="grid grid-cols-2 gap-2 sm:gap-3">
-              <div className="space-y-0.5 p-2.5 sm:p-3.5 rounded-lg sm:rounded-xl transition-all hover:bg-white" style={{
-                background: 'rgba(253, 242, 248, 0.3)',
-                border: '1px solid rgba(210, 138, 140, 0.05)'
-              }}>
-                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest" style={{ color: '#94a3b8' }}>Experience</p>
-                <p className="font-semibold text-slate-900 text-xs sm:text-[15px]">{vendorState?.businessDetails?.years || '0'} Years</p>
-              </div>
-              <div className="space-y-0.5 p-2.5 sm:p-3.5 rounded-lg sm:rounded-xl transition-all hover:bg-white" style={{
-                background: 'rgba(253, 242, 248, 0.3)',
-                border: '1px solid rgba(210, 138, 140, 0.05)'
-              }}>
-                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest" style={{ color: '#94a3b8' }}>Team Size</p>
-                <p className="font-semibold text-slate-900 text-xs sm:text-[15px]">{vendorState?.businessDetails?.teamSize || '0'} Max</p>
-              </div>
-            </div>
-          </div>
+           </div>
         </div>
 
-        {/* Profile Strength */}
-        <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-8 flex flex-col justify-center relative overflow-hidden">
-          <div className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full opacity-20" style={{
-            background: 'radial-gradient(circle, #D28A8C, transparent 70%)'
-          }}></div>
-          <div className="relative z-10">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-3 sm:mb-4" style={{ color: '#D28A8C' }}>Profile strength</p>
-            <div className="flex items-end gap-2 sm:gap-3 mb-3 sm:mb-4">
-              <h3 className="text-4xl sm:text-5xl font-bold leading-none bg-clip-text text-transparent" style={{
-                backgroundImage: 'linear-gradient(135deg, #D28A8C, #C27A7C, #a855f7)'
-              }}>{completion}%</h3>
-              <p className="text-xs sm:text-sm font-bold uppercase tracking-wider mb-0.5 sm:mb-1" style={{ color: '#cbd5e1' }}>COMPLETED</p>
-            </div>
-            <div className="h-2 sm:h-3 w-full rounded-full overflow-hidden" style={{ background: 'rgba(210, 138, 140, 0.08)' }}>
-              <div className="h-full rounded-full" style={{ 
-                width: `${completion}%`,
-                background: 'linear-gradient(90deg, #D28A8C, #C27A7C, #a855f7)',
-                boxShadow: '0 0 15px rgba(210, 138, 140, 0.4)'
-              }}></div>
-            </div>
-            <p className="mt-4 sm:mt-6 text-xs sm:text-sm font-semibold text-slate-500 leading-relaxed">
-              Complete your documents and bank details to achieve a 100% verified badge and improve your visibility to customers.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Documents + Bank */}
-      <div className="grid gap-4 sm:gap-6 xl:grid-cols-2 pb-6 sm:pb-10">
-        <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-8">
-          <h3 className="text-base sm:text-xl font-bold text-slate-900 mb-3 sm:mb-6 flex items-center gap-2 sm:gap-3">
-            <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl flex items-center justify-center" style={{
-              background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)'
-            }}>
-              <Icon name="checkList" size="xs" color="currentColor" />
-            </div>
-            Documents Status
-          </h3>
-          <div className="space-y-2.5 sm:space-y-4">
-            {[
-              { label: 'ID Proof', key: 'idProof' },
-              { label: 'GST Certificate', key: 'gst' },
-              { label: 'Service Contract', key: 'contract' }
-            ].map(doc => (
-              <div key={doc.key} className="flex items-center justify-between rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all hover:scale-[1.01]" style={{
-                background: 'rgba(253, 242, 248, 0.3)',
-                border: '1px solid rgba(210, 138, 140, 0.06)'
-              }}>
-                <span className="text-xs sm:text-sm font-bold text-slate-700">{doc.label}</span>
-                <span className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider" style={
-                  vendorState?.documents?.[doc.key] 
-                    ? { background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)', color: '#15803d' }
-                    : { background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)', color: '#94a3b8' }
-                }>
-                  {vendorState?.documents?.[doc.key] ? '✓ Verified' : 'Pending'}
-                </span>
+        {/* Card 2: Bank Account & Name - Sky */}
+        <div className="vendor-surface rounded-2xl p-5 relative overflow-hidden border border-blue-100/50 shadow-sm transition-all" style={{ backgroundColor: '#F0F9FF' }}>
+           <div className="flex items-center gap-3 mb-5">
+              <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-blue-500 shadow-sm">
+                 <Icon name="card" size="sm" />
               </div>
-            ))}
-          </div>
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">Bank Details</h3>
+           </div>
+           
+           <div className="space-y-4">
+              <div className="space-y-1">
+                 <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest">Account Name</p>
+                 {isEditing ? (
+                   <input className="w-full bg-white/60 border border-blue-200 rounded-lg px-3 py-1.5 text-xs font-black" value={tempProfile.accName} onChange={(e) => handleChange('accName', e.target.value)} />
+                 ) : (
+                   <p className="text-sm font-black text-slate-900 truncate">{tempProfile.accName || 'Not Set'}</p>
+                 )}
+              </div>
+              <div className="space-y-1">
+                 <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest">Account Number</p>
+                 {isEditing ? (
+                   <input className="w-full bg-white/60 border border-blue-200 rounded-lg px-3 py-1.5 text-xs font-black" value={tempProfile.accNo} onChange={(e) => handleChange('accNo', e.target.value)} />
+                 ) : (
+                   <p className="text-sm font-black text-slate-900 truncate">{tempProfile.accNo || 'Not Set'}</p>
+                 )}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest">IFSC Code</p>
+                    {isEditing ? (
+                      <input className="w-full bg-white/60 border border-blue-200 rounded-lg px-3 py-1.5 text-xs font-black" value={tempProfile.ifsc} onChange={(e) => handleChange('ifsc', e.target.value)} />
+                    ) : (
+                      <p className="text-[11px] font-black text-slate-900">{tempProfile.ifsc || 'Not Set'}</p>
+                    )}
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black text-slate-900/30 uppercase tracking-widest">UPI ID</p>
+                    {isEditing ? (
+                      <input className="w-full bg-white/60 border border-blue-200 rounded-lg px-3 py-1.5 text-xs font-black" value={tempProfile.upiId} onChange={(e) => handleChange('upiId', e.target.value)} />
+                    ) : (
+                      <p className="text-[11px] font-black text-rose-500 truncate">{tempProfile.upiId || 'Not Set'}</p>
+                    )}
+                 </div>
+              </div>
+           </div>
         </div>
 
-        <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-8 relative overflow-hidden">
-          <div className="absolute -top-16 -right-16 w-36 h-36 rounded-full opacity-10" style={{
-            background: 'radial-gradient(circle, #a855f7, transparent 70%)'
-          }}></div>
-          <h3 className="text-base sm:text-xl font-bold text-slate-900 mb-3 sm:mb-6 flex items-center gap-2 sm:gap-3 relative z-10">
-            <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl flex items-center justify-center" style={{
-              background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)'
-            }}>
-              <Icon name="bank" size="xs" color="currentColor" />
-            </div>
-            Bank Accounts
-          </h3>
-          <div className="space-y-3 sm:space-y-5 relative z-10">
-            <div className="grid grid-cols-2 gap-y-3 sm:gap-y-5 text-xs sm:text-sm">
-              {[
-                { label: 'Account Name', value: vendorState?.bank?.accountName || 'Not added' },
-                { label: 'Account Number', value: vendorState?.bank?.accountNumber || 'Not added' },
-                { label: 'IFSC Code', value: vendorState?.bank?.ifsc || 'Not added' },
-                { label: 'UPI ID', value: vendorState?.bank?.upiId || 'Not added', highlight: true }
-              ].map(item => (
-                <div key={item.label} className="space-y-0.5 sm:space-y-1">
-                  <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest" style={{ color: '#94a3b8' }}>{item.label}</p>
-                  <p className={`font-bold ${item.highlight ? '' : 'text-slate-800 uppercase'}`} style={item.highlight ? { color: '#D28A8C' } : {}}>
-                    {item.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3" style={{
-              background: 'linear-gradient(135deg, rgba(253,242,248,0.5), rgba(245,243,255,0.5))',
-              border: '1px solid rgba(210, 138, 140, 0.08)'
-            }}>
-              <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold flex-shrink-0" style={{
-                background: 'linear-gradient(135deg, #D28A8C, #C27A7C)',
-                color: 'white'
-              }}>i</div>
-              <p className="text-[10px] sm:text-[11px] font-bold leading-snug" style={{ color: '#64748b' }}>Payments are processed within 48 hours of booking completion.</p>
-            </div>
-          </div>
+        {/* Card 3: Strength - Purple */}
+        <div className="vendor-surface rounded-2xl p-5 relative overflow-hidden border border-purple-100/50 shadow-sm transition-all" style={{ backgroundColor: '#F5F3FF' }}>
+           <div className="flex items-center justify-between mb-5">
+              <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-purple-600 shadow-sm">
+                 <Icon name="star" size="sm" />
+              </div>
+              <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-white/60 rounded-lg text-purple-600 border border-purple-100">Live Rating</span>
+           </div>
+           <div>
+              <p className="text-[10px] font-black text-slate-900/30 uppercase tracking-widest mb-1">Profile Strength</p>
+              <h3 className="text-4xl font-black text-slate-900 tracking-tighter leading-none mb-3">67%</h3>
+              <div className="h-2 w-full bg-white/60 rounded-full overflow-hidden">
+                 <div className="h-full bg-purple-500 rounded-full transition-all duration-1000" style={{ width: '67%' }}></div>
+              </div>
+              <p className="text-[9px] font-bold text-slate-500 mt-3 italic leading-tight">Complete bank details for 100% verification.</p>
+           </div>
         </div>
-      </div>
 
-      {/* Logout Section */}
-      <div className="vendor-surface rounded-2xl sm:rounded-3xl p-6 sm:p-8 flex items-center justify-between gap-4 border border-rose-100 bg-rose-50/30">
-        <div>
-          <h3 className="text-lg font-bold text-slate-900">Sign out</h3>
-          <p className="text-sm font-medium text-slate-500">Securely sign out from your vendor account.</p>
+        {/* Card 4: Verification - Orange */}
+        <div className="vendor-surface rounded-2xl p-5 relative overflow-hidden border border-orange-100/50 shadow-sm transition-all" style={{ backgroundColor: '#FFF7ED' }}>
+           <div className="flex items-center justify-between mb-5">
+              <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-orange-600 shadow-sm">
+                 <Icon name="check" size="sm" />
+              </div>
+              <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-white/60 rounded-lg text-emerald-600 border border-emerald-100">Approved</span>
+           </div>
+           <div className="space-y-3">
+              <p className="text-[10px] font-black text-slate-900/30 uppercase tracking-widest mb-1">Credential Status</p>
+              <div className="grid grid-cols-2 gap-2">
+                 {['ID Proof', 'GST Cert', 'Contract'].map(doc => (
+                   <div key={doc} className="bg-white/40 rounded-xl px-3 py-2 border border-orange-100/50 flex items-center gap-2">
+                      <Icon name="check" size="xs" color="#10b981" />
+                      <span className="text-[9px] font-black text-slate-600 uppercase tracking-tight">{doc}</span>
+                   </div>
+                 ))}
+              </div>
+           </div>
         </div>
-        <button 
-          onClick={() => window.location.href = '/vendor/login'}
-          className="px-6 py-3 rounded-2xl bg-white text-rose-600 font-bold text-sm shadow-sm border border-rose-100 hover:bg-rose-50 transition-all active:scale-95 flex items-center gap-2"
-        >
-          <Icon name="logout" size="sm" color="current" />
-          Logout
-        </button>
+
+        {/* Card 5: Visibility - Green */}
+        <div className="vendor-surface rounded-2xl p-5 relative overflow-hidden border border-emerald-100/50 shadow-sm transition-all" style={{ backgroundColor: '#F0FDF4' }}>
+           <div className="flex items-center justify-between mb-5">
+              <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-emerald-600 shadow-sm">
+                 <Icon name="stats" size="sm" />
+              </div>
+              <Icon name="more" size="xs" color="currentColor" className="opacity-20" />
+           </div>
+           <div>
+              <p className="text-[10px] font-black text-slate-900/30 uppercase tracking-widest mb-1">Market Visibility</p>
+              <h3 className="text-xl font-black text-slate-900 truncate">High Visibility</h3>
+              <div className="flex items-center gap-2 mt-3">
+                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                 <p className="text-[9px] font-black text-emerald-800 uppercase tracking-widest">Active Ranking</p>
+              </div>
+           </div>
+        </div>
+
       </div>
     </div>
   );

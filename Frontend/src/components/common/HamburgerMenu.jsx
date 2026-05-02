@@ -53,27 +53,27 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
       {/* 2. Editorial Panel */}
       <div
         className={`fixed top-0 right-0 bottom-0 z-[70] w-[85%] max-w-[400px] shadow-2xl transition-transform duration-700 cubic-bezier(0.4, 0, 0.2, 1) ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
-        style={{ backgroundColor: '#EAE1D8' }}
+        style={{ backgroundColor: '#FDF2F8' }}
       >
         {/* Arched Header - Ultra Compact */}
-        <div className="bg-white px-6 pt-8 pb-6 rounded-b-[2rem] shadow-sm flex items-center justify-between border-b border-[#3D2B2B]/5">
+        <div className="bg-gradient-to-br from-[#9D174D] via-[#BE185D] to-[#9D174D] px-6 pt-8 pb-6 rounded-b-[2rem] shadow-sm flex items-center justify-between border-b border-white/10">
            <div>
-              <h2 className="text-xl font-bold text-[#3D2B2B]" style={{ fontFamily: '"Playfair Display", serif' }}>Menu</h2>
-              <p className="text-[8px] font-black uppercase tracking-widest text-[#3D2B2B]/30">The Utsav Collection</p>
+              <h2 className="text-xl font-bold text-white" style={{ fontFamily: '"Playfair Display", serif' }}>Menu</h2>
+              <p className="text-[8px] font-black uppercase tracking-widest text-white/60">The Utsav Collection</p>
            </div>
            <button 
              onClick={onClose}
-             className="w-9 h-9 rounded-full flex items-center justify-center bg-[#EAE1D8]/30 border border-[#EAE1D8] active:scale-90 transition-all"
+             className="w-9 h-9 rounded-full flex items-center justify-center bg-white/20 border border-white/30 active:scale-90 transition-all"
            >
-              <Icon name="close" size="xs" style={{ color: '#3D2B2B' }} />
+              <Icon name="close" size="xs" style={{ color: 'white' }} />
            </button>
         </div>
 
         {/* Scrollable Content - High Density */}
-        <div className="overflow-y-auto h-[calc(100vh-80px)] p-4 space-y-4 scrollbar-hide">
+        <div className="overflow-y-auto h-[calc(100vh-80px)] p-4 space-y-2.5 scrollbar-hide">
            {/* Section 1: Member Card - Ultra Compact */}
            {isAuthenticated && (
-             <div className="bg-white rounded-[1.5rem] p-4 space-y-3 shadow-sm border border-black/5">
+             <div className="bg-white rounded-[1.5rem] p-3 space-y-3 shadow-sm border border-black/5">
                 <div className="flex items-center gap-3">
                    <div className="w-10 h-10 rounded-full overflow-hidden border border-[#EAE1D8] shadow-sm">
                       <img 
@@ -127,11 +127,11 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
                    { title: 'Shortlist', path: '/user/shortlist', icon: 'bookmark' },
                    { title: 'Favourites', path: '/user/favourites', icon: 'heart' }
                  ].map((item, i) => (
-                   <button 
-                     key={i}
-                     onClick={() => handleNavigation(item.path)}
-                     className="w-full flex items-center justify-between p-3.5 rounded-[1.25rem] bg-white shadow-sm border border-black/5 hover:bg-gray-50 active:scale-98 transition-all"
-                   >
+                    <button 
+                      key={i}
+                      onClick={() => handleNavigation(item.path)}
+                      className="w-full flex items-center justify-between p-2.5 rounded-[1.25rem] bg-white shadow-sm border border-black/5 hover:bg-pink-50 active:scale-98 transition-all"
+                    >
                      <div className="flex items-center gap-3">
                         <Icon name={item.icon} size="xs" style={{ color: '#3D2B2B/60' }} />
                         <span className="text-[11px] font-bold text-[#3D2B2B]" style={{ fontFamily: '"Playfair Display", serif' }}>{item.title}</span>
@@ -143,7 +143,7 @@ const HamburgerMenu = ({ isOpen, onClose }) => {
            </div>
 
            {/* Section 4: Global Settings */}
-           <div className="pt-8 border-t border-[#3D2B2B]/10 flex items-center justify-between">
+           <div className="pt-4 border-t border-[#3D2B2B]/10 flex items-center justify-between">
               <button 
                 onClick={handleLogout}
                 className="flex items-center gap-3 text-[#BE185D]"

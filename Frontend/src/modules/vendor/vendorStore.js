@@ -45,20 +45,32 @@ export const defaultVendorState = {
     status: 'Pending'
   },
   listingStatus: 'Draft',
-  leads: [],
-  quotes: [],
-  bookings: [],
+  leads: [
+    { id: '1', customerName: 'Aarya Pathak', eventDate: '2026-06-15', eventLocation: 'Indore', status: 'New' },
+    { id: '2', customerName: 'Ishaan Verma', eventDate: '2026-07-02', eventLocation: 'Ujjain', status: 'Pending' }
+  ],
+  quotes: [
+    { _id: 'q-1', userId: { name: 'Aarya Pathak' }, leadId: { eventLocation: 'Indore' }, totalAmount: 75000, status: 'Sent', createdAt: new Date().toISOString() }
+  ],
+  bookings: [
+    { id: '1', customerName: 'Rahul & Sneha', eventDate: '2026-05-20', location: 'Sayaji Hotel, Indore', status: 'Upcoming' },
+    { id: '2', customerName: 'Vikram Singh', eventDate: '2026-05-28', location: 'Radisson Blu, Indore', status: 'Upcoming' }
+  ],
   availability: {
     blockedDates: [todayISO()]
   },
   analytics: {
-    profileViews: 0,
-    inquiries: 0,
-    bookings: 0,
-    conversionRate: 0
+    profileViews: 1240,
+    inquiries: 45,
+    bookings: 12,
+    conversionRate: 8.5
   },
-  status: 'Pending',
-  notifications: []
+  status: 'Approved',
+  notifications: [
+    { id: '1', message: 'You have a new inquiry for Wedding Decor', time: '2 hours ago' },
+    { id: '2', message: 'Booking confirmed for Rahul & Sneha', time: '5 hours ago' },
+    { id: '3', message: 'Your KYC documents have been verified', time: '1 day ago' }
+  ]
 };
 
 export const loadVendorState = () => {
