@@ -72,7 +72,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
     'http://192.168.1.28:5173',
     'http://localhost:3000',
     'http://localhost:8080',
-    'https://uc-wed.vercel.app'
+    'https://uc-wed.vercel.app',
+    'https://utsavchakra-wine.vercel.app'
   ];
 
 app.use(cors({
