@@ -31,8 +31,7 @@ const vendorSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        required: [true, 'Please select a service category'],
-        enum: ['Decorator', 'Photographer', 'Caterer', 'Makeup Artist', 'Venue', 'Live Streaming']
+        required: [true, 'Please provide a service category']
     },
     password: {
         type: String,

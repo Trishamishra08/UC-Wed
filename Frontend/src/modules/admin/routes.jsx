@@ -14,6 +14,7 @@ import AdminBanners from './pages/AdminBanners';
 import AdminProfile from './pages/AdminProfile';
 import AdminLogin from './pages/AdminLogin';
 import AdminGateways from './pages/AdminGateways';
+import AdminVendorVerification from './pages/AdminVendorVerification';
 
 // Simple placeholder page component
 const PlaceholderPage = ({ title }) => (
@@ -33,6 +34,7 @@ const AdminRoutes = () => {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="vendors" element={<AdminVendors />} />
+        <Route path="verification" element={<AdminVendorVerification />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="subscriptions" element={<AdminSubscriptions />} />
         <Route path="bookings" element={<AdminBookings />} />

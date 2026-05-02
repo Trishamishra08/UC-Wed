@@ -9,8 +9,6 @@ import loginImg from '../../../assets/login (2).png';
 const VendorRegister = () => {
   const navigate = useNavigate();
   const { vendorState, updateVendorState } = useVendorState();
-  const [openCity, setOpenCity] = useState(false);
-  const [openCategory, setOpenCategory] = useState(false);
   const [formState, setFormState] = useState({
     fullName: vendorState?.registration?.fullName || '',
     businessName: vendorState?.registration?.businessName || '',
@@ -239,91 +237,47 @@ const VendorRegister = () => {
               <div className="grid sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>Location</label>
-                  <div className="relative">
-                    <div 
-                      className="w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm font-semibold border transition-all cursor-pointer flex items-center justify-between gap-2 shadow-sm"
-                      style={{
-                        borderColor: 'rgba(237, 100, 143, 0.15)',
-                        background: 'rgba(255, 255, 255, 0.95)',
-                        color: '#ed648f'
-                      }}
-                      onClick={() => setOpenCity(!openCity)}
-                    >
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors" style={{ color: '#64748b' }}>
-                        <Icon name="location" size="sm" color="current" />
-                      </div>
-                      {formState.city || 'Select Location'}
-                      <Icon name="chevronDown" size="xs" color="#ed648f" className={`transition-transform duration-300 ${openCity ? 'rotate-180' : ''}`} />
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors" style={{ color: '#64748b' }}>
+                      <Icon name="location" size="sm" color="current" />
                     </div>
-
-                    {/* Custom Dropdown Menu */}
-                    {openCity && (
-                      <>
-                        <div className="fixed inset-0 z-[90]" onClick={() => setOpenCity(false)}></div>
-                        <div className="absolute left-0 top-full mt-1.5 w-full bg-white rounded-xl shadow-2xl border border-[#ed648f20] transition-all z-[100] overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200">
-                          {['Indore', 'Bhopal', 'Ujjain', 'Dewas'].map((city) => (
-                            <div
-                              key={city}
-                              className={`px-11 py-2.5 text-sm font-bold cursor-pointer transition-colors flex items-center gap-3 ${
-                                formState.city === city ? 'bg-[#ed648f10] text-[#ed648f]' : 'text-slate-600 hover:bg-[#ed648f08] hover:text-[#ed648f]'
-                              }`}
-                              onClick={() => {
-                                handleChange('city', city);
-                                setOpenCity(false);
-                              }}
-                            >
-                              <div className={`w-1.5 h-1.5 rounded-full transition-all ${formState.city === city ? 'bg-[#ed648f] scale-100' : 'bg-transparent scale-0'}`}></div>
-                              {city}
-                            </div>
-                          ))}
-                        </div>
-                      </>
-                    )}
+                    <input
+                      className="w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm font-semibold transition-all focus:ring-2 focus:ring-rose-500/20"
+                      style={{
+                        border: '1px solid rgba(237, 100, 143, 0.15)',
+                        background: 'rgba(255, 255, 255, 0.95)'
+                      }}
+                      value={formState.city}
+                      onChange={(event) => {
+                        const val = event.target.value;
+                        const capitalized = val.charAt(0).toUpperCase() + val.slice(1);
+                        handleChange('city', capitalized);
+                      }}
+                      placeholder="e.g. Indore"
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>Category</label>
-                  <div className="relative">
-                    <div 
-                      className="w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm font-semibold border transition-all cursor-pointer flex items-center justify-between gap-2 shadow-sm"
-                      style={{
-                        borderColor: 'rgba(237, 100, 143, 0.15)',
-                        background: 'rgba(255, 255, 255, 0.95)',
-                        color: '#ed648f'
-                      }}
-                      onClick={() => setOpenCategory(!openCategory)}
-                    >
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors" style={{ color: '#64748b' }}>
-                        <Icon name="palette" size="sm" color="current" />
-                      </div>
-                      {formState.category || 'Select Category'}
-                      <Icon name="chevronDown" size="xs" color="#ed648f" className={`transition-transform duration-300 ${openCategory ? 'rotate-180' : ''}`} />
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors" style={{ color: '#64748b' }}>
+                      <Icon name="palette" size="sm" color="current" />
                     </div>
-
-                    {/* Custom Dropdown Menu */}
-                    {openCategory && (
-                      <>
-                        <div className="fixed inset-0 z-[90]" onClick={() => setOpenCategory(false)}></div>
-                        <div className="absolute left-0 top-full mt-1.5 w-full bg-white rounded-xl shadow-2xl border border-[#ed648f20] transition-all z-[100] overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200">
-                          {['Decorator', 'Photographer', 'Caterer', 'Makeup Artist', 'Venue', 'Live Streaming'].map((cat) => (
-                            <div
-                              key={cat}
-                              className={`px-11 py-2.5 text-sm font-bold cursor-pointer transition-colors flex items-center gap-3 ${
-                                formState.category === cat ? 'bg-[#ed648f10] text-[#ed648f]' : 'text-slate-600 hover:bg-[#ed648f08] hover:text-[#ed648f]'
-                              }`}
-                              onClick={() => {
-                                handleChange('category', cat);
-                                setOpenCategory(false);
-                              }}
-                            >
-                              <div className={`w-1.5 h-1.5 rounded-full transition-all ${formState.category === cat ? 'bg-[#ed648f] scale-100' : 'bg-transparent scale-0'}`}></div>
-                              {cat}
-                            </div>
-                          ))}
-                        </div>
-                      </>
-                    )}
+                    <input
+                      className="w-full rounded-2xl pl-11 pr-4 py-3.5 text-sm font-semibold transition-all focus:ring-2 focus:ring-rose-500/20"
+                      style={{
+                        border: '1px solid rgba(237, 100, 143, 0.15)',
+                        background: 'rgba(255, 255, 255, 0.95)'
+                      }}
+                      value={formState.category}
+                      onChange={(event) => {
+                        const val = event.target.value;
+                        const capitalized = val.charAt(0).toUpperCase() + val.slice(1);
+                        handleChange('category', capitalized);
+                      }}
+                      placeholder="e.g. Photographer"
+                    />
                   </div>
                 </div>
               </div>

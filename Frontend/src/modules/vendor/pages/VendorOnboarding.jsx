@@ -55,7 +55,13 @@ const VendorOnboarding = () => {
           const res = await vendorApi.getSubscriptionPlans(token);
           if (res.success) {
             setActivePlans(res.data);
-            if (res.data.length > 0) setSelectedPlanId(res.data[0]._id);
+            if (vendorState.subscription?.planId) {
+              setSelectedPlanId(vendorState.subscription.planId);
+            } else if (res.data.length > 0) {
+              const firstPlanId = res.data[0]._id;
+              setSelectedPlanId(firstPlanId);
+              updateVendorState({ subscription: { ...vendorState.subscription, planId: firstPlanId } });
+            }
           }
         } catch (err) {
           console.error('Failed to fetch plans:', err);
@@ -952,7 +958,10 @@ const VendorOnboarding = () => {
                 {activePlans.map((plan) => (
                   <div 
                     key={plan._id}
-                    onClick={() => setSelectedPlanId(plan._id)}
+                    onClick={() => {
+                      setSelectedPlanId(plan._id);
+                      updateVendorState({ subscription: { ...vendorState.subscription, planId: plan._id } });
+                    }}
                     className={`relative p-8 rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden ${selectedPlanId === plan._id ? 'border-primary-400 bg-primary-50/10 shadow-2xl shadow-primary-400/20' : 'border-slate-100 hover:border-primary-400/40 bg-white/50'}`}
                   >
                     {selectedPlanId === plan._id && (
@@ -984,6 +993,11 @@ const VendorOnboarding = () => {
                       </div>
 
                       <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPlanId(plan._id);
+                          updateVendorState({ subscription: { ...vendorState.subscription, planId: plan._id } });
+                        }}
                         className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${selectedPlanId === plan._id ? 'bg-primary-400 text-white shadow-lg shadow-primary-400/30' : 'bg-slate-100 text-slate-500 group-hover:bg-primary-400/10'}`}
                       >
                         {selectedPlanId === plan._id ? 'Plan Selected' : `Select ${plan.name}`}

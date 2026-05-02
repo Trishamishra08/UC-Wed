@@ -34,7 +34,7 @@ const navPages = [
   ]
 ];
 
-const VendorBottomNav = () => {
+const VendorBottomNav = ({ isApproved }) => {
   const [currentPage, setCurrentPage] = useState(0);
 
   const handleMoreClick = () => {
@@ -44,40 +44,46 @@ const VendorBottomNav = () => {
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] px-4 pb-4 vendor-bottom-nav">
       <nav className="mx-auto max-w-md bg-white shadow-[0_-5px_25px_rgba(0,0,0,0.05),0_20px_50px_rgba(237,100,143,0.15)] rounded-2xl border border-white/80 px-2 py-2 flex items-center justify-between backdrop-blur-xl transition-all duration-500">
-        {navPages[currentPage].map((item) => (
-          <NavLink
-            key={item.to + item.label}
-            to={item.to}
-            className={({ isActive }) =>
-              `flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-2xl transition-all duration-300 relative ${
-                isActive ? 'text-[#ed648f]' : 'text-slate-400'
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <div className="relative">
-                  {isActive && (
-                    <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#ed648f] shadow-[0_0_8px_rgba(237,100,143,0.6)] z-10"></div>
-                  )}
-                  <div className={`transition-all duration-300 ${isActive ? 'scale-110' : ''}`}>
-                    <Icon 
-                      name={item.icon} 
-                      size="sm" 
-                      color="current"
-                      fill={isActive ? 'currentColor' : 'none'}
-                    />
+        {navPages[currentPage].map((item) => {
+          const isHome = item.label === 'Home';
+          const isDisabled = !isApproved && !isHome;
+
+          return (
+            <NavLink
+              key={item.to + item.label}
+              to={isDisabled ? '#' : item.to}
+              onClick={(e) => isDisabled && e.preventDefault()}
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-2xl transition-all duration-300 relative ${
+                  isActive && !isDisabled ? 'text-[#ed648f]' : isDisabled ? 'text-slate-300' : 'text-slate-400'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <div className="relative">
+                    {isActive && !isDisabled && (
+                      <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#ed648f] shadow-[0_0_8px_rgba(237,100,143,0.6)] z-10"></div>
+                    )}
+                    <div className={`transition-all duration-300 ${isActive && !isDisabled ? 'scale-110' : ''}`}>
+                      <Icon 
+                        name={isDisabled ? 'lock' : item.icon} 
+                        size="sm" 
+                        color="current"
+                        fill={isActive && !isDisabled ? 'currentColor' : 'none'}
+                      />
+                    </div>
                   </div>
-                </div>
-                <span className={`text-[9px] font-bold tracking-tight transition-all duration-300 ${
-                  isActive ? 'opacity-100' : 'opacity-70'
-                }`}>
-                  {item.label}
-                </span>
-              </>
-            )}
-          </NavLink>
-        ))}
+                  <span className={`text-[9px] font-bold tracking-tight transition-all duration-300 ${
+                    isActive && !isDisabled ? 'opacity-100' : 'opacity-70'
+                  }`}>
+                    {item.label}
+                  </span>
+                </>
+              )}
+            </NavLink>
+          );
+        })}
 
         {/* More Button */}
         <button

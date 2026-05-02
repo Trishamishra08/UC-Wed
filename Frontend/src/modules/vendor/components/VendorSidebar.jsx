@@ -18,7 +18,7 @@ const navItems = [
   { label: 'Settings', to: '/vendor/settings', icon: 'edit' }
 ];
 
-const VendorSidebar = ({ onClose }) => {
+const VendorSidebar = ({ onClose, isApproved }) => {
   const navigate = useNavigate();
   return (
     <aside className="h-full w-72" style={{
@@ -32,7 +32,7 @@ const VendorSidebar = ({ onClose }) => {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <div className="h-24 w-auto flex items-center justify-center transition-transform hover:scale-110">
-                  <img src="/assets/vendor/logo_theme.png" alt="UtsavChakra Logo" className="h-full w-auto rounded-2xl" />
+                   <img src="/assets/vendor/logo_theme.png" alt="UtsavChakra Logo" className="h-full w-auto rounded-2xl" />
                 </div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#ed648f' }}>Vendor Panel</p>
               </div>
@@ -49,50 +49,60 @@ const VendorSidebar = ({ onClose }) => {
           </div>
           <div className="mt-3 flex items-center gap-2 text-xs font-semibold" style={{ color: '#94a3b8' }}>
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: '#ed648f' }}></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: '#ed648f' }}></span>
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isApproved ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isApproved ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
             </span>
-            Online & accepting
+            {isApproved ? 'Online & Active' : 'Under Review'}
           </div>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto min-h-0 px-3 py-4 space-y-1 no-scrollbar overscroll-contain touch-pan-y">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `group flex items-center gap-3 rounded-2xl px-4 py-3 text-[13px] font-semibold transition-all duration-300 relative overflow-hidden ${isActive
-                  ? 'text-white shadow-lg'
-                  : 'text-slate-500 hover:text-[#ed648f] hover:bg-[#FAF2F2]/50'
-                }`
-              }
-              style={({ isActive }) => isActive ? {
-                background: 'linear-gradient(135deg, #ed648f, #ed648f)',
-                boxShadow: '0 8px 25px rgba(237, 100, 143, 0.3)'
-              } : {}}
-              onClick={onClose}
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <div className="absolute left-0 top-0 w-1 h-full rounded-r-full bg-white/40"></div>
-                  )}
-                  <div className={`flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-300 ${isActive
-                    ? 'bg-white/20'
-                    : 'bg-slate-50 group-hover:bg-[#F4DFDF]'
-                    }`}>
-                    <Icon name={item.icon} size="sm" color="current" />
-                  </div>
-                  <span>{item.label}</span>
-                  {isActive && (
-                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-white animate-pulse"></div>
-                  )}
-                </>
-              )}
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            const isHome = item.label === 'Dashboard' || item.label === 'Profile';
+            const isDisabled = !isApproved && !isHome;
+
+            return (
+              <NavLink
+                key={item.to}
+                to={isDisabled ? '#' : item.to}
+                onClick={(e) => {
+                  if (isDisabled) e.preventDefault();
+                  else onClose();
+                }}
+                className={({ isActive }) =>
+                  `group flex items-center gap-3 rounded-2xl px-4 py-3 text-[13px] font-semibold transition-all duration-300 relative overflow-hidden ${
+                    isActive && !isDisabled
+                    ? 'text-white shadow-lg'
+                    : isDisabled ? 'text-slate-300' : 'text-slate-500 hover:text-[#ed648f] hover:bg-[#FAF2F2]/50'
+                  }`
+                }
+                style={({ isActive }) => isActive && !isDisabled ? {
+                  background: 'linear-gradient(135deg, #ed648f, #ed648f)',
+                  boxShadow: '0 8px 25px rgba(237, 100, 143, 0.3)'
+                } : {}}
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && !isDisabled && (
+                      <div className="absolute left-0 top-0 w-1 h-full rounded-r-full bg-white/40"></div>
+                    )}
+                    <div className={`flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-300 ${
+                      isActive && !isDisabled
+                      ? 'bg-white/20'
+                      : isDisabled ? 'bg-slate-50' : 'bg-slate-50 group-hover:bg-[#F4DFDF]'
+                      }`}>
+                      <Icon name={isDisabled ? 'lock' : item.icon} size="sm" color="current" />
+                    </div>
+                    <span>{item.label}</span>
+                    {isActive && !isDisabled && (
+                      <div className="ml-auto h-1.5 w-1.5 rounded-full bg-white animate-pulse"></div>
+                    )}
+                  </>
+                )}
+              </NavLink>
+            );
+          })}
         </nav>
 
         {/* Sign Out */}

@@ -20,6 +20,7 @@ const navigation = [
     {
         title: 'Ecosystem',
         items: [
+            { path: '/admin/verification', icon: 'shield', label: 'Verification Desk' },
             { path: '/admin/vendors', icon: 'user', label: 'Partners Console' },
             { path: '/admin/users', icon: 'users', label: 'Client Directory' },
             { path: '/admin/bookings', icon: 'calendar', label: 'Global Bookings' },
