@@ -1,11 +1,18 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import Icon from '../../../components/ui/Icon';
 import '../adminTheme.css';
 
 const AdminLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem('adminToken');
+        sessionStorage.removeItem('adminAuth');
+        navigate('/admin/login');
+    };
 
     return (
         <div className="flex min-h-screen bg-[#FFF9F9] font-sans admin-theme">
@@ -64,10 +71,18 @@ const AdminLayout = () => {
                                 <p className="text-[13px] font-black text-slate-900 leading-none">Super Admin</p>
                                 <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">Main Control</p>
                             </div>
-                            <div className="h-10 w-10 rounded-2xl bg-slate-100 p-0.5 border border-slate-200 group-hover:border-[#F9AEAF]/30 transition-colors shadow-sm">
+                            <div className="h-10 w-10 rounded-2xl bg-slate-100 p-0.5 border border-slate-200 group-hover:border-[#F9AEAF]/30 transition-colors shadow-sm overflow-hidden">
                                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin" className="w-full h-full rounded-xl" />
                             </div>
                         </div>
+
+                        <button 
+                            onClick={handleLogout}
+                            className="h-10 px-4 flex items-center gap-2 rounded-xl bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200"
+                        >
+                            <Icon name="logout" size="xs" color="white" />
+                            <span className="hidden md:inline">Logout</span>
+                        </button>
                     </div>
                 </header>
 

@@ -3,10 +3,25 @@ import Icon from '../../../components/ui/Icon';
 import weddingImg from '../../../assets/wedding.png';
 import { useVendorState } from '../useVendorState';
 import { computeProfileCompletion, getListingStatusClass } from '../vendorStore';
+import VendorPendingApproval from '../components/VendorPendingApproval';
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
-  const { vendorState, updateVendorState } = useVendorState();
+  const { vendorState, updateVendorState, loading } = useVendorState();
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ed648f]"></div>
+      </div>
+    );
+  }
+
+  // Check if vendor is pending approval
+  if (vendorState.status === 'Pending') {
+    return <VendorPendingApproval />;
+  }
+
   const completion = computeProfileCompletion(vendorState);
 
   const handleSubmitListing = () => {
@@ -25,9 +40,9 @@ const VendorDashboard = () => {
       {/* Stats Grid */}
       <div className="grid gap-2.5 sm:gap-4 grid-cols-2 xl:grid-cols-4">
         {statCards.map((stat, i) => (
-          <div 
-            key={stat.label} 
-            className="vendor-surface rounded-2xl sm:rounded-3xl p-3 sm:p-4 lg:p-6 group cursor-pointer transition-all duration-500 hover:translate-y-[-4px] active:scale-[0.98]" 
+          <div
+            key={stat.label}
+            className="vendor-surface rounded-2xl sm:rounded-3xl p-3 sm:p-4 lg:p-6 group cursor-pointer transition-all duration-500 hover:translate-y-[-4px] active:scale-[0.98]"
             style={{ animationDelay: `${i * 0.08}s` }}
             onClick={() => navigate(stat.to)}
           >
@@ -50,9 +65,9 @@ const VendorDashboard = () => {
         <div className="vendor-surface rounded-2xl sm:rounded-3xl relative overflow-hidden group shadow-none border-none">
           {/* Background Image */}
           <div className="absolute top-0 right-0 h-full w-4/5 sm:w-1/2 z-0 pointer-events-none overflow-hidden">
-            <img 
-              src={weddingImg} 
-              alt="Wedding Theme" 
+            <img
+              src={weddingImg}
+              alt="Wedding Theme"
               className="h-full w-full object-contain object-right-bottom sm:object-right transition-transform duration-700 group-hover:scale-105 opacity-90 sm:opacity-100"
             />
           </div>
@@ -71,10 +86,10 @@ const VendorDashboard = () => {
                   <p className="text-xs sm:text-sm font-medium mt-0.5 sm:mt-1 max-w-[180px] sm:max-w-[240px]" style={{ color: '#94a3b8' }}>Complete your profile to improve ranking.</p>
                 </div>
               </div>
-              
+
               {/* Progress bar */}
               <div className="mt-3 sm:mt-5 h-2 sm:h-2.5 w-full max-w-[220px] sm:max-w-none rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(237, 100, 143, 0.08)' }}>
-                <div className="h-full rounded-full transition-all duration-1000 ease-out relative" style={{ 
+                <div className="h-full rounded-full transition-all duration-1000 ease-out relative" style={{
                   width: completion + '%',
                   background: 'linear-gradient(90deg, #ed648f, #f182a5, #f4a0bb)',
                   boxShadow: '0 0 20px rgba(237, 100, 143, 0.4)'
@@ -86,13 +101,13 @@ const VendorDashboard = () => {
                   }}></div>
                 </div>
               </div>
-              
+
               <div className="mt-4 sm:mt-5 flex flex-wrap items-center gap-2 sm:gap-2.5">
                 <button type="button" className="vendor-cta rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-[11px] font-bold tracking-wide flex items-center gap-1.5" onClick={handleSubmitListing}>
                   <Icon name="sparkles" size="xs" /> Submit for review
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-[11px] font-bold transition-all active:scale-95"
                   style={{
                     border: '1px solid rgba(237, 100, 143, 0.2)',
@@ -120,9 +135,8 @@ const VendorDashboard = () => {
           </div>
           <div className="space-y-2 sm:space-y-3">
             {vendorState.notifications.map((note) => (
-              <div 
-                key={note.id} 
-                className="flex items-start gap-2.5 sm:gap-3 rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all hover:scale-[1.02] cursor-pointer active:scale-[0.98]" 
+              <div
+                key={note._id || note.id}
                 style={{
                   background: 'linear-gradient(135deg, rgba(253,242,248,0.5), rgba(255,241,242,0.5))',
                   border: '1px solid rgba(237, 100, 143, 0.06)'
@@ -158,9 +172,8 @@ const VendorDashboard = () => {
           </div>
           <div className="space-y-2 sm:space-y-3">
             {vendorState.leads.map((lead) => (
-              <div 
-                key={lead.id} 
-                className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all hover:scale-[1.01] cursor-pointer active:scale-[0.98]" 
+              <div
+                key={lead._id || lead.id}
                 style={{
                   border: '1px solid rgba(237, 100, 143, 0.08)',
                   background: 'rgba(253, 242, 248, 0.3)'
@@ -191,9 +204,8 @@ const VendorDashboard = () => {
           </div>
           <div className="space-y-2 sm:space-y-3">
             {vendorState.bookings.map((booking) => (
-              <div 
-                key={booking.id} 
-                className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all hover:scale-[1.01] cursor-pointer active:scale-[0.98]" 
+              <div
+                key={booking._id || booking.id}
                 style={{
                   border: '1px solid rgba(237, 100, 143, 0.08)',
                   background: 'rgba(253, 242, 248, 0.3)'

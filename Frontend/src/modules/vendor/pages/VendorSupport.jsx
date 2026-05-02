@@ -1,145 +1,180 @@
 import { useState, useEffect } from 'react';
 import Icon from '../../../components/ui/Icon';
+import { vendorApi } from '../vendorApi';
 
 const VendorSupport = () => {
-  const [ticket, setTicket] = useState({ subject: '', description: '' });
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [tickets, setTickets] = useState([]);
+  const [showCreate, setShowCreate] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    subject: '',
+    category: 'Technical',
+    message: '',
+    priority: 'Medium'
+  });
 
   useEffect(() => {
-    if (showSuccess) { 
-      document.body.style.overflow = 'hidden'; 
-      document.body.classList.add('modal-open');
-    } else { 
-      document.body.style.overflow = 'unset'; 
-      document.body.classList.remove('modal-open');
-    }
-    return () => { 
-      document.body.style.overflow = 'unset'; 
-      document.body.classList.remove('modal-open');
-    };
-  }, [showSuccess]);
+    fetchTickets();
+  }, []);
 
-  const handleSubmit = () => {
-    if (!ticket.subject || !ticket.description) {
-      alert('Please fill in both subject and description.');
-      return;
+  const fetchTickets = async () => {
+    const token = localStorage.getItem('vendorToken');
+    const res = await vendorApi.getSupportTickets(token);
+    if (res.success) {
+      setTickets(res.data);
     }
-    setShowSuccess(true);
-    setTicket({ subject: '', description: '' });
+    setLoading(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('vendorToken');
+    const res = await vendorApi.createSupportTicket(formData, token);
+    if (res.success) {
+      setTickets([res.data, ...tickets]);
+      setShowCreate(false);
+      setFormData({ subject: '', category: 'Technical', message: '', priority: 'Medium' });
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Open': return '#3b82f6';
+      case 'In-Progress': return '#f59e0b';
+      case 'Resolved': return '#10b981';
+      default: return '#64748b';
+    }
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-7 relative overflow-hidden">
-        <div className="absolute -top-20 -right-20 w-44 h-44 rounded-full opacity-15" style={{
-          background: 'radial-gradient(circle, #D28A8C, transparent 70%)'
-        }}></div>
+      <div className="vendor-surface rounded-3xl p-7 relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="relative z-10">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#D28A8C' }}>Support</p>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1">Vendor help desk</h2>
-          <p className="text-xs sm:text-sm font-medium" style={{ color: '#94a3b8' }}>Raise tickets and get dedicated vendor support.</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-rose-500">Support Center</p>
+          <h2 className="text-2xl font-bold text-slate-900 mt-1">Help & Assistance</h2>
+          <p className="text-sm font-medium text-slate-400">Get quick resolution for your queries from our expert team.</p>
         </div>
+        <button
+          onClick={() => setShowCreate(true)}
+          className="relative z-10 px-6 py-3 rounded-2xl bg-rose-500 text-white font-bold shadow-lg shadow-rose-200 hover:scale-105 transition-all text-sm flex items-center gap-2"
+        >
+          <Icon name="edit" size="xs" />
+          New Ticket
+        </button>
       </div>
 
-      <div className="grid gap-4 sm:gap-6 xl:grid-cols-[1.2fr_1fr]">
-        {/* Ticket Form */}
-        <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-7">
-          <div className="flex items-center gap-2 mb-3 sm:mb-5">
-            <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl flex items-center justify-center" style={{
-              background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)'
-            }}>
-              <Icon name="mail" size="xs" color="#A35E60" />
-            </div>
-            <h3 className="text-base sm:text-lg font-semibold text-slate-900">Raise a ticket</h3>
-          </div>
-          <div className="space-y-3 sm:space-y-4">
-            <input 
-              className="w-full rounded-xl sm:rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3.5 text-sm font-semibold transition-all"
-              style={{
-                border: '1px solid rgba(210, 138, 140, 0.12)',
-                background: 'rgba(253, 242, 248, 0.25)'
-              }}
-              placeholder="Subject" 
-              value={ticket.subject}
-              onChange={(e) => setTicket({...ticket, subject: e.target.value})}
-            />
-            <textarea 
-              className="h-24 sm:h-32 w-full rounded-xl sm:rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3.5 text-sm font-semibold transition-all resize-none"
-              style={{
-                border: '1px solid rgba(210, 138, 140, 0.12)',
-                background: 'rgba(253, 242, 248, 0.25)'
-              }}
-              placeholder="Describe the issue"
-              value={ticket.description}
-              onChange={(e) => setTicket({...ticket, description: e.target.value})}
-            ></textarea>
-            <button 
-              type="button" 
-              className="vendor-cta rounded-xl sm:rounded-2xl px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-semibold w-full sm:w-auto tracking-wide" 
-              onClick={handleSubmit}
-            >
-              Submit ticket
-            </button>
-          </div>
-        </div>
+      {/* List */}
+      <div className="vendor-surface rounded-3xl p-6 sm:p-8">
+        <h3 className="text-lg font-bold text-slate-800 mb-6">Recent Tickets</h3>
 
-        {/* Success Modal */}
-        {showSuccess && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-hidden" style={{
-            background: 'rgba(15, 23, 42, 0.4)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)'
-          }}>
-            <div className="w-full max-w-sm rounded-[1.5rem] p-5 sm:p-8 shadow-2xl text-center" style={{
-              background: 'linear-gradient(180deg, #ffffff 0%, #FAF2F2 100%)',
-              border: '1px solid rgba(210, 138, 140, 0.1)'
-            }}>
-              <div className="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full mb-4 sm:mb-6" style={{
-                background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)'
-              }}>
-                <Icon name="checkList" size="lg" color="#A35E60" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-1 sm:mb-2">Ticket Submitted!</h3>
-              <p className="text-xs sm:text-sm font-medium mb-5 sm:mb-8" style={{ color: '#94a3b8' }}>Our support team will get back to you within 24 hours.</p>
-              <button 
-                className="vendor-cta w-full rounded-xl sm:rounded-2xl py-3 sm:py-3.5 font-semibold text-sm"
-                onClick={() => setShowSuccess(false)}
-              >
-                Okay, got it
-              </button>
-            </div>
+        {loading ? (
+          <div className="text-center py-10">Loading Tickets...</div>
+        ) : tickets.length === 0 ? (
+          <div className="text-center py-16 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+            <Icon name="checkList" size="xl" color="#cbd5e1" />
+            <p className="mt-4 text-slate-400 font-bold">No active support tickets</p>
           </div>
-        )}
-
-        {/* FAQ */}
-        <div className="vendor-surface rounded-2xl sm:rounded-3xl p-4 sm:p-7">
-          <div className="flex items-center gap-2 mb-3 sm:mb-5">
-            <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl flex items-center justify-center" style={{
-              background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)'
-            }}>
-              <Icon name="help" size="xs" color="#A35E60" />
-            </div>
-            <h3 className="text-base sm:text-lg font-semibold text-slate-900">FAQ</h3>
-          </div>
-          <div className="space-y-2 sm:space-y-3">
-            {[
-              'How do I get verified?',
-              'How can I edit pricing?',
-              'How do payouts work?',
-              'How to upload contracts?'
-            ].map((q) => (
-              <div key={q} className="rounded-xl sm:rounded-2xl p-3 sm:p-4 text-xs sm:text-sm font-medium cursor-pointer transition-all hover:scale-[1.01]" style={{
-                background: 'rgba(253, 242, 248, 0.3)',
-                border: '1px solid rgba(210, 138, 140, 0.06)',
-                color: '#64748b'
-              }}>
-                {q}
+        ) : (
+          <div className="grid gap-4">
+            {tickets.map(ticket => (
+              <div key={ticket._id} className="p-5 rounded-2xl bg-white border border-slate-100 hover:border-rose-100 transition-all group flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h4 className="font-bold text-slate-800">{ticket.subject}</h4>
+                    <span className="text-[10px] font-bold px-2 py-1 rounded bg-slate-100 text-slate-500 uppercase tracking-tighter">
+                      #{ticket._id.slice(-6)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs font-medium text-slate-400">
+                    <span className="flex items-center gap-1"><Icon name="clock" size="xs" /> {new Date(ticket.createdAt).toLocaleDateString()}</span>
+                    <span className="flex items-center gap-1"><Icon name="account" size="xs" /> {ticket.category}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: getStatusColor(ticket.status) }}>{ticket.status}</span>
+                    <span className="text-[10px] font-medium text-slate-300">Priority: {ticket.priority}</span>
+                  </div>
+                  <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-rose-50 group-hover:text-rose-500 flex items-center justify-center transition-all">
+                    <Icon name="chevronDown" size="xs" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
-        </div>
+        )}
       </div>
+
+      {/* Create Modal */}
+      {showCreate && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <form onSubmit={handleSubmit} className="w-full max-w-lg bg-white rounded-[2.5rem] p-8 shadow-2xl flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-slate-900">Raise a Support Ticket</h3>
+              <p className="text-sm text-slate-400 font-medium">Please provide detailed information about your issue.</p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Category</label>
+                  <select
+                    value={formData.category}
+                    onChange={e => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-100 px-4 text-sm font-semibold outline-none focus:border-rose-200 transition-all"
+                  >
+                    <option>Technical</option>
+                    <option>Payments</option>
+                    <option>Profile</option>
+                    <option>Leads</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Priority</label>
+                  <select
+                    value={formData.priority}
+                    onChange={e => setFormData({ ...formData, priority: e.target.value })}
+                    className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-100 px-4 text-sm font-semibold outline-none focus:border-rose-200 transition-all"
+                  >
+                    <option>Low</option>
+                    <option>Medium</option>
+                    <option>High</option>
+                    <option>Urgent</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Subject</label>
+                <input
+                  placeholder="Enter brief summary of issue"
+                  value={formData.subject}
+                  onChange={e => setFormData({ ...formData, subject: e.target.value })}
+                  required
+                  className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-100 px-4 text-sm font-semibold outline-none focus:border-rose-200 transition-all"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Message</label>
+                <textarea
+                  rows="4"
+                  placeholder="Describe your concern in detail..."
+                  value={formData.message}
+                  onChange={e => setFormData({ ...formData, message: e.target.value })}
+                  required
+                  className="w-full rounded-2xl bg-slate-50 border border-slate-100 p-4 text-sm font-semibold outline-none focus:border-rose-200 transition-all resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 pt-2">
+              <button type="button" onClick={() => setShowCreate(false)} className="flex-1 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50 transition-all">Cancel</button>
+              <button type="submit" className="flex-2 py-4 px-8 rounded-2xl bg-rose-500 text-white font-bold shadow-xl shadow-rose-200 hover:scale-105 transition-all">Submit Ticket</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

@@ -11,9 +11,10 @@ const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 require('dotenv').config();
 
-// Import routes
 const userRoutes = require('./modules/user');
 const vendorRoutes = require('./modules/vendor');
+const adminRoutes = require('./modules/admin');
+const initializeAdmin = require('./utils/adminInit');
 
 // Create Express app
 const app = express();
@@ -138,6 +139,8 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/user', userRoutes);
 app.use('/api/vendor', vendorRoutes);
+app.get('/api/admin/test', (req, res) => res.json({ success: true, message: 'Test route works' }));
+app.use('/api/admin', adminRoutes);
 
 // Fallback for requests without /api prefix
 app.use('/user', userRoutes);
@@ -201,6 +204,7 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   await connectDB();
+  await initializeAdmin();
 
   httpServer.listen(PORT, () => {
     console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);

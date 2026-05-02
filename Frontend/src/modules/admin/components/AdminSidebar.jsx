@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import Icon from '../../../components/ui/Icon';
 
 const navigation = [
@@ -43,6 +43,18 @@ const navigation = [
 ];
 
 const AdminSidebar = ({ onClose }) => {
+    const navigate = useNavigate();
+
+    const handleLogout = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        localStorage.removeItem('adminToken');
+        sessionStorage.removeItem('adminAuth');
+        navigate('/admin/login');
+    };
+
     return (
         <aside className="h-full w-60 bg-[#1A0F0F] text-slate-400 flex flex-col border-r border-white/5 shadow-xl transition-all duration-300">
             {/* Header - Compact */}
@@ -99,13 +111,7 @@ const AdminSidebar = ({ onClose }) => {
 
             {/* Footer - Professional */}
             <div className="p-3 flex-shrink-0 mt-auto border-t border-white/5">
-                <NavLink
-                    to="/admin/profile"
-                    className={({ isActive }) => `
-                        bg-white/5 rounded-xl p-2.5 flex items-center justify-between border transition-all cursor-pointer group
-                        ${isActive ? 'border-primary-400/40 bg-primary-400/5' : 'border-white/5 hover:border-primary-400/20'}
-                    `}
-                >
+                <div className="bg-white/5 rounded-xl p-2.5 flex items-center justify-between border border-white/5 transition-all group">
                     <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-white/5 p-0.5 border border-white/10 overflow-hidden">
                             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin" className="w-full h-full object-cover rounded-md" />
@@ -115,10 +121,14 @@ const AdminSidebar = ({ onClose }) => {
                             <p className="text-[8px] text-primary-400/70 font-black tracking-widest mt-0.5 uppercase">Master</p>
                         </div>
                     </div>
-                    <button className="text-white/20 hover:text-primary-400 transition-colors p-1">
+                    <button 
+                        onClick={handleLogout}
+                        className="text-white/20 hover:text-primary-400 transition-colors p-2 hover:bg-white/5 rounded-lg"
+                        title="Logout from System"
+                    >
                         <Icon name="logout" size="xs" />
                     </button>
-                </NavLink>
+                </div>
             </div>
         </aside>
     );

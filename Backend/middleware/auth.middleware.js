@@ -108,6 +108,31 @@ const protectVendor = async (req, res, next) => {
   }
 };
 
+// Check if vendor has active subscription
+const requireSubscription = (req, res, next) => {
+  if (!req.vendor.subscription || req.vendor.subscription.status !== 'Active') {
+    return res.status(403).json({
+      success: false,
+      message: 'Active subscription required. Please complete your subscription.',
+      subscriptionRequired: true
+    });
+  }
+  next();
+};
+
+// Check if vendor is approved by admin
+const requireVendorApproval = (req, res, next) => {
+  if (req.vendor.status !== 'Approved') {
+    return res.status(403).json({
+      success: false,
+      message: 'Your account is pending approval from admin. Please wait for verification.',
+      approvalPending: true,
+      status: req.vendor.status
+    });
+  }
+  next();
+};
+
 // Optional authentication - doesn't fail if no token
 const optionalAuth = async (req, res, next) => {
   try {
@@ -226,6 +251,8 @@ module.exports = {
   protectVendor,
   optionalAuth,
   requireVerification,
+  requireSubscription,
+  requireVendorApproval,
   authorize,
   authRateLimit,
   otpRateLimit,

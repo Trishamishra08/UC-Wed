@@ -45,62 +45,20 @@ export const defaultVendorState = {
     status: 'Pending'
   },
   listingStatus: 'Draft',
-  leads: [
-    {
-      id: 'lead-1',
-      customerName: 'Ananya Sharma',
-      phone: '+91 98765 43210',
-      eventDate: '2026-04-12',
-      eventLocation: 'Indore',
-      message: 'Looking for full decor package for 300 guests.',
-      status: 'New'
-    },
-    {
-      id: 'lead-2',
-      customerName: 'Rohit Verma',
-      phone: '+91 98220 11444',
-      eventDate: '2026-05-05',
-      eventLocation: 'Bhopal',
-      message: 'Need stage + lighting only.',
-      status: 'Contacted'
-    }
-  ],
-  quotes: [
-    {
-      id: 'qt-1',
-      customerName: 'Ananya Sharma',
-      items: [
-        { label: 'Decoration', amount: 40000 },
-        { label: 'Lighting', amount: 10000 },
-        { label: 'Stage', amount: 15000 }
-      ],
-      status: 'Pending'
-    }
-  ],
-  bookings: [
-    {
-      id: 'bk-1',
-      customerName: 'Rohit Verma',
-      eventDate: '2026-05-05',
-      location: 'Bhopal',
-      services: ['Reception Decoration'],
-      totalPrice: 30000,
-      status: 'Confirmed'
-    }
-  ],
+  leads: [],
+  quotes: [],
+  bookings: [],
   availability: {
     blockedDates: [todayISO()]
   },
   analytics: {
-    profileViews: 1240,
-    inquiries: 38,
-    bookings: 12,
-    conversionRate: 31
+    profileViews: 0,
+    inquiries: 0,
+    bookings: 0,
+    conversionRate: 0
   },
-  notifications: [
-    { id: 'nt-1', message: 'New inquiry received from Ananya Sharma', time: '2 hours ago' },
-    { id: 'nt-2', message: 'Quote accepted by Rohit Verma', time: '1 day ago' }
-  ]
+  status: 'Pending',
+  notifications: []
 };
 
 export const loadVendorState = () => {
@@ -109,7 +67,7 @@ export const loadVendorState = () => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultVendorState;
     const parsed = JSON.parse(raw);
-    
+
     // Deep merge or at least merge main sections
     return {
       ...defaultVendorState,

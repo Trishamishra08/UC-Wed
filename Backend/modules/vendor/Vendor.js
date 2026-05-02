@@ -102,9 +102,28 @@ const vendorSchema = new mongoose.Schema({
         type: String,
         default: 'vendor'
     },
+    status: {
+        type: String,
+        enum: ['Pending', 'Approved', 'Rejected'],
+        default: 'Pending'
+    },
     isVerified: {
         type: Boolean,
         default: false
+    },
+    profileViews: {
+        type: Number,
+        default: 0
+    },
+    subscription: {
+        planId: String,
+        planName: String,
+        amount: Number,
+        status: { type: String, enum: ['Pending', 'Active', 'Expired'], default: 'Pending' },
+        paymentId: String,
+        orderId: String,
+        startDate: Date,
+        endDate: Date
     },
     createdAt: {
         type: Date,
@@ -115,9 +134,9 @@ const vendorSchema = new mongoose.Schema({
 });
 
 // Encrypt password using bcrypt
-vendorSchema.pre('save', async function (next) {
+vendorSchema.pre('save', async function () {
     if (!this.isModified('password')) {
-        next();
+        return;
     }
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);

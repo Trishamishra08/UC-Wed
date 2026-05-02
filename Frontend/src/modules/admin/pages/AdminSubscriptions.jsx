@@ -1,36 +1,125 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/ui/Icon';
-
-const INITIAL_SUBS = [
-    { id: 101, u: 'Royal Photography', p: 'Premium', c: 'Yearly', d: '20 Oct 2024', v: '₹49,999' },
-    { id: 102, u: 'Floral Dreams', p: 'Gold', c: 'Monthly', d: '21 Oct 2024', v: '₹2,499' },
-    { id: 103, u: 'Indore Caterers', p: 'Standard', c: 'Monthly', d: '22 Oct 2024', v: '₹999' },
-    { id: 104, u: 'Grand Venues', p: 'Premium', c: 'Yearly', d: '15 Nov 2024', v: '₹49,999' },
-];
+import { adminApi } from '../services/adminApi';
 
 const AdminSubscriptions = () => {
-    const [billingCycle, setBillingCycle] = useState('Monthly');
-    const [subs, setSubs] = useState(INITIAL_SUBS);
+    const [plans, setPlans] = useState([]);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingPlanId, setEditingPlanId] = useState(null);
+    const [editData, setEditData] = useState({ name: '', price: '', durationValue: 1, durationUnit: 'year' });
+    const [subs, setSubs] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState(true);
 
-    const plans = [
-        { name: 'Standard Partner', monthly: '₹999', yearly: '₹9,999', vendors: 142, icon: 'rocket', color: 'bg-slate-100 text-slate-500' },
-        { name: 'Gold Affiliate', monthly: '₹2,499', yearly: '₹24,999', vendors: 86, icon: 'sparkles', color: 'bg-amber-50 text-amber-500' },
-        { name: 'Premium Agency', monthly: '₹4,999', yearly: '₹49,999', vendors: 24, icon: 'money', color: 'bg-primary-50 text-primary-400' },
-    ];
+    const token = localStorage.getItem('adminToken');
+    const navigate = useNavigate();
 
-    const filteredSubs = useMemo(() => {
-        return subs.filter(s =>
-            s.u.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.p.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    }, [subs, searchQuery]);
+    const fetchData = async () => {
+        if (!token) {
+            navigate('/admin/login');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const [planRes, vendorsRes] = await Promise.all([
+                adminApi.getSubscriptionPlans(token),
+                adminApi.getVendors(token)
+            ]);
+
+            if (planRes.message === 'Invalid token.' || vendorsRes.message === 'Invalid token.') {
+                localStorage.removeItem('adminToken');
+                navigate('/admin/login');
+                return;
+            }
+
+            if (planRes.success) {
+                setPlans(planRes.data);
+            }
+            if (vendorsRes.success) {
+                setSubs(vendorsRes.data.filter(v => v.subscription?.status === 'Active'));
+            }
+        } catch (err) {
+            console.error('Fetch error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!token) {
+            navigate('/admin/login');
+        } else {
+            fetchData();
+        }
+    }, [token]);
+
+    const handleEditClick = (plan) => {
+        setEditingPlanId(plan._id);
+        setEditData({
+            name: plan.name,
+            price: plan.price,
+            durationValue: plan.durationValue,
+            durationUnit: plan.durationUnit
+        });
+        setIsEditing(true);
+    };
+
+    const handleAddNewClick = () => {
+        setEditingPlanId(null);
+        setEditData({ name: '', price: '', durationValue: 1, durationUnit: 'year' });
+        setIsEditing(true);
+    };
+
+    const [subLoading, setSubLoading] = useState(false);
+
+    const handleUpdatePlan = async () => {
+        if (!editData.name || !editData.price) {
+            alert('Please provide Plan Name and Price');
+            return;
+        }
+
+        try {
+            setSubLoading(true);
+            let res;
+            if (editingPlanId) {
+                res = await adminApi.updateSubscriptionPlan(editingPlanId, editData, token);
+            } else {
+                res = await adminApi.createSubscriptionPlan(editData, token);
+            }
+
+            if (res.success) {
+                setIsEditing(false);
+                setEditingPlanId(null);
+                alert(editingPlanId ? 'Plan updated successfully! ✨' : 'New plan initialized successfully! 🚀');
+                fetchData();
+            } else {
+                alert(res.message || 'Operation failed. Please check server logs.');
+            }
+        } catch (err) {
+            console.error('Update error:', err);
+            alert('Network error or server is down.');
+        } finally {
+            setSubLoading(false);
+        }
+    };
 
     const terminateSub = (id) => {
         if (window.confirm('Revoke this partner license? Access will be decoupled immediately.')) {
-            setSubs(prev => prev.filter(s => s.id !== id));
+            // Terminate logic
+            setSubs(prev => prev.filter(s => s._id !== id));
         }
     };
+
+    const filteredSubs = useMemo(() => {
+        return subs.filter(s =>
+            (s.businessName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (s.fullName || '').toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [subs, searchQuery]);
+
+    if (loading) return <div className="p-20 text-center animate-pulse text-[10px] font-black uppercase tracking-widest text-slate-400">Syncing Ledger...</div>;
 
     return (
         <div className="space-y-6 animate-in slide-in-from-top-4 duration-500">
@@ -51,97 +140,154 @@ const AdminSubscriptions = () => {
                             className="pl-9 pr-4 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold focus:ring-2 focus:ring-primary-400/10 outline-none w-48 transition-all"
                         />
                     </div>
-                    <div className="flex bg-white p-1 rounded-lg border border-slate-200">
-                        {['Monthly', 'Yearly'].map((cycle) => (
-                            <button
-                                key={cycle}
-                                onClick={() => setBillingCycle(cycle)}
-                                className={`px-4 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all ${billingCycle === cycle ? 'bg-primary-400 text-white shadow-sm' : 'text-slate-400 hover:text-slate-900'
-                                    }`}
-                            >
-                                {cycle}
-                            </button>
-                        ))}
-                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {plans.map((plan) => (
-                    <div key={plan.name} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm group hover:border-primary-400 transition-all">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${plan.color}`}>
-                                <Icon name={plan.icon} size="xs" color="current" />
-                            </div>
-                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded tracking-widest uppercase ${billingCycle === 'Yearly' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
-                                {billingCycle === 'Yearly' ? 'Save 17%' : 'Default'}
-                            </span>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1 space-y-6">
+                    {/* Active Plans List */}
+                    <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subscription Tiers</h2>
+                            <button 
+                                onClick={handleAddNewClick}
+                                className="h-6 w-6 rounded-lg bg-primary-50 text-primary-400 flex items-center justify-center hover:bg-primary-400 hover:text-white transition-all"
+                            >
+                                <Icon name="plus" size="xs" color="current" />
+                            </button>
                         </div>
-                        <div>
-                            <h3 className="text-[13px] font-black text-slate-900 tracking-tight leading-none">{plan.name}</h3>
-                            <div className="flex items-baseline gap-1 mt-2">
-                                <p className="text-2xl font-black text-slate-900 tracking-tighter">
-                                    {billingCycle === 'Monthly' ? plan.monthly : plan.yearly}
-                                </p>
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">/ {billingCycle === 'Monthly' ? 'mo' : 'yr'}</span>
-                            </div>
-                        </div>
-                        <div className="mt-6 pt-6 border-t border-slate-50 flex items-center justify-between">
-                            <div className="flex flex-col">
-                                <span className="text-[14px] font-black text-slate-800 leading-none">{plan.vendors}</span>
-                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Active Partners</span>
-                            </div>
-                            <button className="h-8 px-4 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">Config</button>
+
+                        <div className="space-y-3">
+                            {plans.map((p) => (
+                                <div key={p._id} className={`p-4 rounded-2xl border transition-all cursor-pointer group ${editingPlanId === p._id ? 'border-primary-400 bg-primary-50/10' : 'border-slate-50 hover:border-slate-200'}`}>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[11px] font-black text-slate-900">{p.name}</p>
+                                            <p className="text-[9px] font-bold text-slate-400">₹{p.price.toLocaleString()} / {p.durationValue} {p.durationUnit}</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => handleEditClick(p)}
+                                            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-slate-100 rounded-lg transition-all"
+                                        >
+                                            <Icon name="sparkles" size="xs" color="#94a3b8" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                ))}
-            </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm min-h-[300px]">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="bg-slate-50/50">
-                            <tr>
-                                <th className="px-5 py-3 text-[8px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Partner</th>
-                                <th className="px-4 py-3 text-[8px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Tier / Cycle</th>
-                                <th className="px-4 py-3 text-[8px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Next Billing</th>
-                                <th className="px-4 py-3 text-[8px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Valuation</th>
-                                <th className="px-5 py-4 text-right border-b border-slate-100">Ops</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                            {filteredSubs.length > 0 ? filteredSubs.map((sub) => (
-                                <tr key={sub.id} className="hover:bg-primary-50/5 transition-colors group">
-                                    <td className="px-5 py-2.5 text-[11px] font-black text-slate-900">{sub.u}</td>
-                                    <td className="px-4 py-2.5">
-                                        <div className="flex flex-col">
-                                            <span className={`text-[8px] font-black uppercase tracking-widest ${sub.p === 'Premium' ? 'text-primary-500' : sub.p === 'Gold' ? 'text-amber-500' : 'text-slate-500'}`}>{sub.p}</span>
-                                            <span className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em]">{sub.c}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-2.5 text-[9px] font-bold text-slate-400 uppercase">{sub.d}</td>
-                                    <td className="px-4 py-2.5 text-[11px] font-black text-slate-900">{sub.v}</td>
-                                    <td className="px-5 py-2.5 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100">
-                                            <button className="text-[8px] font-black text-primary-400 uppercase hover:text-primary-600 transition-colors">Invoice</button>
+                    {/* Edit/Create Form */}
+                    {isEditing && (
+                        <div className="bg-white p-6 rounded-3xl border border-primary-400 shadow-xl shadow-primary-400/5 space-y-5 animate-in slide-in-from-bottom-4 duration-500">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
+                                    {editingPlanId ? 'Reconfigure Tier' : 'Deploy New Tier'}
+                                </h3>
+                                <button onClick={() => setIsEditing(false)} className="text-[10px] font-black text-slate-400 hover:text-rose-400 uppercase tracking-widest">Cancel</button>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div className="space-y-1">
+                                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Plan Identity</label>
+                                    <input 
+                                        className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold text-slate-900 outline-none focus:border-primary-400/50 transition-all"
+                                        placeholder="e.g. Platinum Access"
+                                        value={editData.name}
+                                        onChange={(e) => setEditData({...editData, name: e.target.value})}
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Monetization (₹)</label>
+                                    <input 
+                                        type="number"
+                                        className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold text-slate-900 outline-none focus:border-primary-400/50 transition-all"
+                                        value={editData.price}
+                                        onChange={(e) => setEditData({...editData, price: e.target.value})}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                        <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Duration</label>
+                                        <input 
+                                            type="number"
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold text-slate-900 outline-none focus:border-primary-400/50 transition-all"
+                                            value={editData.durationValue}
+                                            onChange={(e) => setEditData({...editData, durationValue: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Cycle</label>
+                                        <select 
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold text-slate-900 outline-none focus:border-primary-400/50 transition-all"
+                                            value={editData.durationUnit}
+                                            onChange={(e) => setEditData({...editData, durationUnit: e.target.value})}
+                                        >
+                                            <option value="month">Month(s)</option>
+                                            <option value="year">Year(s)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={handleUpdatePlan}
+                                    disabled={subLoading}
+                                    className={`w-full bg-slate-900 text-white rounded-xl py-3 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-200 active:scale-95 transition-all ${subLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    {subLoading ? 'Processing...' : (editingPlanId ? 'Commit Changes' : 'Initialize Plan')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm min-h-[300px]">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="bg-slate-50/50">
+                                <tr>
+                                    <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Partner Details</th>
+                                    <th className="px-4 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Plan Status</th>
+                                    <th className="px-4 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Expiry Date</th>
+                                    <th className="px-4 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Ops</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {filteredSubs.length > 0 ? filteredSubs.map((sub) => (
+                                    <tr key={sub._id} className="hover:bg-primary-50/5 transition-colors group">
+                                        <td className="px-6 py-3">
+                                            <div className="flex flex-col">
+                                                <span className="text-[12px] font-black text-slate-900">{sub.businessName}</span>
+                                                <span className="text-[9px] font-bold text-slate-400 uppercase">{sub.fullName}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex flex-col">
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Active</span>
+                                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">{sub.subscription?.planName}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase">
+                                            {sub.subscription?.endDate ? new Date(sub.subscription.endDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                                        </td>
+                                        <td className="px-6 py-3 text-right">
                                             <button
-                                                onClick={() => terminateSub(sub.id)}
-                                                className="text-[8px] font-black text-rose-400 uppercase hover:text-rose-600 transition-colors"
+                                                onClick={() => terminateSub(sub._id)}
+                                                className="text-[9px] font-black text-rose-400 uppercase hover:text-rose-600 transition-colors opacity-20 group-hover:opacity-100"
                                             >
                                                 Revoke
                                             </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="5" className="py-20 text-center">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No subscribers match grep query</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan="4" className="py-20 text-center">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No subscribers found</p>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

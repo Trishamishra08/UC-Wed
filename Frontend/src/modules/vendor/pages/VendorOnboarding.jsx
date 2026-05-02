@@ -16,7 +16,7 @@ const steps = [
 const VendorOnboarding = () => {
   const { stepId } = useParams();
   const navigate = useNavigate();
-  const { vendorState, updateVendorState } = useVendorState();
+  const { vendorState, updateVendorState, loading } = useVendorState();
   const currentStepIndex = Math.max(0, steps.findIndex((step) => step.id === stepId));
 
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
@@ -44,16 +44,47 @@ const VendorOnboarding = () => {
     contract: useRef(null)
   };
 
+  const [activePlans, setActivePlans] = useState([]);
+  const [selectedPlanId, setSelectedPlanId] = useState(null);
+
   useEffect(() => {
-    if (showServiceModal) { 
-      document.body.style.overflow = 'hidden'; 
+    const fetchPlans = async () => {
+      const token = localStorage.getItem('vendorToken');
+      if (token) {
+        try {
+          const res = await vendorApi.getSubscriptionPlans(token);
+          if (res.success) {
+            setActivePlans(res.data);
+            if (res.data.length > 0) setSelectedPlanId(res.data[0]._id);
+          }
+        } catch (err) {
+          console.error('Failed to fetch plans:', err);
+        }
+      }
+    };
+    fetchPlans();
+  }, []);
+
+  useEffect(() => {
+    // Scroll to top on step change
+    window.scrollTo(0, 0);
+
+    // If already subscribed, don't show subscription page
+    if (!loading && vendorState.subscription?.status === 'Active' && stepId === 'subscription') {
+      navigate('/vendor/dashboard');
+    }
+  }, [stepId, loading, vendorState.subscription?.status, navigate]);
+
+  useEffect(() => {
+    if (showServiceModal) {
+      document.body.style.overflow = 'hidden';
       document.body.classList.add('modal-open');
-    } else { 
-      document.body.style.overflow = 'unset'; 
+    } else {
+      document.body.style.overflow = 'unset';
       document.body.classList.remove('modal-open');
     }
-    return () => { 
-      document.body.style.overflow = 'unset'; 
+    return () => {
+      document.body.style.overflow = 'unset';
       document.body.classList.remove('modal-open');
     };
   }, [showServiceModal]);
@@ -179,15 +210,96 @@ const VendorOnboarding = () => {
     }
   };
 
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handleNext = async () => {
     const check = canNavigateTo(currentStepIndex + 1);
-    if (!check.complete) {
+    const token = localStorage.getItem('vendorToken');
+
+    if (!check.complete && stepId !== 'subscription') {
       alert(`⚠️ Requirement Missing: Please finish "${check.stepLabel}" to continue.`);
       return;
     }
 
-    const stepData = vendorState[stepId] || vendorState.businessDetails; // Map step to correct state object
-    const token = localStorage.getItem('vendorToken');
+    // Razorpay Integration for Subscription
+    if (stepId === 'subscription') {
+      if (!vendorState.subscription.planId) {
+        alert('Please select a plan to continue.');
+        return;
+      }
+
+      showToast('Initializing secure payment...', 'loading', 0);
+      const sdkLoaded = await loadRazorpay();
+      if (!sdkLoaded) {
+        showToast('Razorpay SDK failed to load. Please check your connection.', 'error');
+        return;
+      }
+
+      try {
+        const res = await vendorApi.createSubscriptionOrder({ planId: selectedPlanId }, token);
+
+        if (res.success) {
+          const options = {
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+            amount: res.order.amount,
+            currency: res.order.currency,
+            name: 'UtsavChakra',
+            description: `Subscription: ${res.plan.name}`,
+            order_id: res.order.id,
+            handler: async (response) => {
+              showToast('Verifying payment...', 'loading', 0);
+              console.log('Payment Success Response:', response);
+              const verifyRes = await vendorApi.verifySubscriptionPayment({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              }, token);
+
+              if (verifyRes.success) {
+                showToast('Payment successful! Your profile is now under review. ✨', 'success');
+                updateVendorState({ 
+                  status: 'Pending', 
+                  subscription: { ...vendorState.subscription, status: 'Active' } 
+                });
+                setTimeout(() => navigate('/vendor/dashboard'), 2000);
+              } else {
+                showToast('Payment verification failed. Please contact support.', 'error');
+                console.error('Verification Error:', verifyRes);
+              }
+            },
+            prefill: {
+              name: vendorState.vendor?.fullName || vendorState.registration?.fullName,
+              email: vendorState.vendor?.email || vendorState.registration?.email,
+              contact: vendorState.vendor?.phone || vendorState.registration?.phone
+            },
+            theme: { color: '#ed648f' },
+            modal: {
+              ondismiss: () => showToast('Payment cancelled', 'info')
+            }
+          };
+          const rzp = new window.Razorpay(options);
+          rzp.open();
+          return;
+        } else {
+          showToast(orderRes.message || 'Failed to create payment order', 'error');
+          console.error('Order Creation Failed:', orderRes);
+        }
+      } catch (err) {
+        showToast('Failed to initialize payment gateway', 'error');
+        console.error('Razorpay Init Error:', err);
+        return;
+      }
+    }
+
+    const stepData = vendorState[stepId] || vendorState.businessDetails;
 
     if (token) {
       try {
@@ -253,7 +365,7 @@ const VendorOnboarding = () => {
               </NavLink>
               {index < steps.length - 1 && (
                 <div className="h-0.5 rounded w-full flex-1 shrink mx-1.5 sm:mx-3 transition-all shadow-inner" style={{
-                   background: index < currentStepIndex ? 'linear-gradient(90deg, #ed648f, #ed648f)' : 'rgba(255, 255, 255, 0.5)'
+                  background: index < currentStepIndex ? 'linear-gradient(90deg, #ed648f, #ed648f)' : 'rgba(255, 255, 255, 0.5)'
                 }}></div>
               )}
             </div>
@@ -460,7 +572,7 @@ const VendorOnboarding = () => {
                         <div className="space-y-1.5">
                           <label className="text-[11px] font-bold uppercase tracking-wider ml-1" style={{ color: '#1e293b' }}>Category</label>
                           <div className="relative">
-                            <div 
+                            <div
                               className="w-full rounded-2xl px-5 py-3.5 text-sm font-semibold border transition-all cursor-pointer flex items-center justify-between gap-2 shadow-sm"
                               style={{
                                 borderColor: 'rgba(237, 100, 143, 0.2)',
@@ -481,11 +593,10 @@ const VendorOnboarding = () => {
                                   {['Decoration', 'Photography', 'Catering', 'Venue'].map((cat) => (
                                     <div
                                       key={cat}
-                                      className={`px-4 py-2.5 text-sm font-bold cursor-pointer transition-colors flex items-center gap-3 ${
-                                        newService.category === cat ? 'bg-[#ed648f10] text-[#ed648f]' : 'text-slate-600 hover:bg-[#ed648f08] hover:text-[#ed648f]'
-                                      }`}
+                                      className={`px-4 py-2.5 text-sm font-bold cursor-pointer transition-colors flex items-center gap-3 ${newService.category === cat ? 'bg-[#ed648f10] text-[#ed648f]' : 'text-slate-600 hover:bg-[#ed648f08] hover:text-[#ed648f]'
+                                        }`}
                                       onClick={() => {
-                                        setNewService({...newService, category: cat});
+                                        setNewService({ ...newService, category: cat });
                                         setOpenDropdown(false);
                                       }}
                                     >
@@ -831,76 +942,59 @@ const VendorOnboarding = () => {
           )}
 
           {stepId === 'subscription' && (
-            <div className="space-y-6 max-w-2xl mx-auto py-4">
-              <div className="text-center mb-8">
-                <h3 className="text-lg sm:text-xl font-bold text-slate-900">Choose your growth partner</h3>
-                <p className="text-xs sm:text-sm font-medium mt-1" style={{ color: '#64748b' }}>Select a plan to start receiving verified leads and boost your business.</p>
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="text-center space-y-3">
+                <h3 className="text-3xl font-black text-slate-900 tracking-tight">Select Your Business Tier</h3>
+                <p className="text-slate-400 text-xs font-black uppercase tracking-widest">Choose the acceleration path that fits your growth</p>
               </div>
 
-              <div 
-                className={`relative group rounded-[2.5rem] p-8 sm:p-10 transition-all duration-500 cursor-pointer overflow-hidden border-2 ${
-                  vendorState.subscription.planId === 'yearly' 
-                    ? 'border-[#ed648f] shadow-2xl shadow-[#ed648f20]' 
-                    : 'border-slate-100 hover:border-[#ed648f40] hover:shadow-xl bg-white/50'
-                }`}
-                onClick={() => updateVendorState({ subscription: { ...vendorState.subscription, planId: 'yearly' } })}
-              >
-                {/* Popular Badge */}
-                <div className="absolute top-6 right-6 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest text-white shadow-lg animate-pulse" style={{ background: 'linear-gradient(135deg, #ed648f, #f182a5)' }}>
-                  Most Popular
-                </div>
-
-                <div className="relative z-10">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="h-14 w-14 rounded-2xl flex items-center justify-center shadow-inner" style={{ background: 'rgba(237, 100, 143, 0.1)', color: '#ed648f' }}>
-                      <Icon name="sparkles" size="lg" color="current" />
-                    </div>
-                    <div>
-                      <h4 className="text-2xl font-bold text-slate-900">Yearly Premium</h4>
-                      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#ed648f' }}>Growth & Visibility Plan</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-baseline gap-1 mb-8">
-                    <span className="text-4xl font-black text-slate-900">₹4,999</span>
-                    <span className="text-sm font-bold text-slate-400">/ per year</span>
-                  </div>
-
-                  <div className="space-y-4 mb-8">
-                    {[
-                      'Receive unlimited verified leads',
-                      'Priority ranking in search results',
-                      'Full portfolio & video showcase',
-                      'Exclusive verified vendor badge',
-                      'Direct customer chat access',
-                      'Premium 24/7 dedicated support'
-                    ].map((feature, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <div className="h-5 w-5 rounded-full flex items-center justify-center bg-emerald-50 text-emerald-500">
-                          <Icon name="checkList" size="xs" color="current" />
-                        </div>
-                        <span className="text-sm font-semibold text-slate-600">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button 
-                    className={`w-full py-4 rounded-2xl font-bold transition-all duration-300 ${
-                      vendorState.subscription.planId === 'yearly'
-                        ? 'bg-[#ed648f] text-white shadow-lg shadow-[#ed648f40]'
-                        : 'bg-slate-100 text-slate-500 group-hover:bg-[#ed648f10] group-hover:text-[#ed648f]'
-                    }`}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {activePlans.map((plan) => (
+                  <div 
+                    key={plan._id}
+                    onClick={() => setSelectedPlanId(plan._id)}
+                    className={`relative p-8 rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden ${selectedPlanId === plan._id ? 'border-primary-400 bg-primary-50/10 shadow-2xl shadow-primary-400/20' : 'border-slate-100 hover:border-primary-400/40 bg-white/50'}`}
                   >
-                    {vendorState.subscription.planId === 'yearly' ? 'Plan Selected' : 'Select Yearly Plan'}
-                  </button>
-                </div>
+                    {selectedPlanId === plan._id && (
+                      <div className="absolute top-0 right-0 p-4">
+                        <div className="h-6 w-6 rounded-full bg-primary-400 text-white flex items-center justify-center shadow-lg">
+                          <Icon name="sparkles" size="xs" color="current" />
+                        </div>
+                      </div>
+                    )}
 
-                {/* Decorative background circle */}
-                <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full opacity-5 group-hover:opacity-10 transition-opacity" style={{ background: '#ed648f' }}></div>
+                    <div className="space-y-6 relative z-10">
+                      <div>
+                        <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.2em]">{plan.name}</h4>
+                        <div className="flex items-baseline gap-1 mt-2">
+                          <span className="text-3xl font-black text-slate-900">₹{plan.price.toLocaleString()}</span>
+                          <span className="text-[10px] font-black text-slate-400 uppercase">/ {plan.durationValue} {plan.durationUnit}(s)</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 py-6 border-y border-slate-100">
+                        {(plan.features || []).map((feature, i) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <div className="h-4 w-4 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0">
+                              <Icon name="sparkles" size="xs" color="current" />
+                            </div>
+                            <span className="text-[11px] font-bold text-slate-600">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <button 
+                        className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${selectedPlanId === plan._id ? 'bg-primary-400 text-white shadow-lg shadow-primary-400/30' : 'bg-slate-100 text-slate-500 group-hover:bg-primary-400/10'}`}
+                      >
+                        {selectedPlanId === plan._id ? 'Plan Selected' : `Select ${plan.name}`}
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <p className="text-[10px] text-center font-medium px-4" style={{ color: '#94a3b8' }}>
-                * Subscription amounts are subject to change based on platform policies. Taxes as applicable.
+              <p className="text-[10px] text-center font-black text-slate-400 uppercase tracking-widest">
+                * Secured by Razorpay • Instant Verification • Auto-Renewal Options
               </p>
             </div>
           )}

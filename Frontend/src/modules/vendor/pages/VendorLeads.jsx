@@ -6,15 +6,27 @@ import Icon from '../../../components/ui/Icon';
 const statusOptions = ['New', 'Contacted', 'Quoted', 'Confirmed', 'Not converted'];
 
 const VendorLeads = () => {
-  const { vendorState, updateVendorState } = useVendorState();
+  const { vendorState, updateVendorState, refreshData } = useVendorState();
   const navigate = useNavigate();
   const [openDropdown, setOpenDropdown] = useState(null);
 
-  const updateStatus = (leadId, status) => {
-    const updated = vendorState.leads.map((lead) =>
-      lead.id === leadId ? { ...lead, status } : lead
-    );
-    updateVendorState({ leads: updated });
+  const updateStatus = async (leadId, status) => {
+    try {
+      const token = localStorage.getItem('vendorToken');
+      // Use _id instead of id for backend compatibility
+      const targetLead = vendorState.leads.find(l => (l.id || l._id) === leadId);
+      const dbId = targetLead?._id || targetLead?.id;
+
+      const res = await vendorApi.updateLeadStatus(dbId, status, token);
+      if (res.success) {
+        const updated = vendorState.leads.map((lead) =>
+          (lead._id || lead.id) === leadId ? { ...lead, status } : lead
+        );
+        updateVendorState({ leads: updated });
+      }
+    } catch (err) {
+      console.error('Failed to update lead status:', err);
+    }
   };
 
   const handleCreateQuote = (customerName) => {
@@ -43,8 +55,8 @@ const VendorLeads = () => {
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-0.5 sm:mt-1">Incoming inquiries</h2>
             <p className="text-xs sm:text-sm font-medium" style={{ color: '#94a3b8' }}>Tracking {(vendorState.leads || []).length} active potential clients</p>
           </div>
-          <button 
-            onClick={() => window.location.reload()}
+          <button
+            onClick={() => refreshData()}
             className="h-9 sm:h-10 px-3 sm:px-5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 sm:gap-2 transition-all active:scale-95 hover:scale-105"
             style={{
               background: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)',
@@ -63,7 +75,7 @@ const VendorLeads = () => {
           {(vendorState.leads || []).length === 0 ? (
             <div className="text-center py-10 sm:py-16">
               <div className="flex justify-center mb-3 sm:mb-4">
-                 <Icon name="mail" size="3xl" color="#cbd5e1" />
+                <Icon name="mail" size="3xl" color="#cbd5e1" />
               </div>
               <p className="font-semibold text-slate-400 text-sm">No leads found</p>
               <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>New inquiries will appear here</p>
@@ -71,8 +83,9 @@ const VendorLeads = () => {
           ) : (
             vendorState.leads.map((lead) => {
               const statusStyle = getLeadStatusStyle(lead.status);
+              const leadId = lead._id || lead.id;
               return (
-                <div key={lead.id} className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 transition-all hover:scale-[1.01] group" style={{
+                <div key={leadId} className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 transition-all hover:scale-[1.01] group" style={{
                   border: '1px solid rgba(237, 100, 143, 0.08)',
                   background: 'rgba(253, 242, 248, 0.2)'
                 }}>
@@ -100,7 +113,7 @@ const VendorLeads = () => {
                   </div>
                   <div className="flex items-center gap-2 sm:gap-3">
                     {lead.status !== 'Quoted' && lead.status !== 'Confirmed' && (
-                      <button 
+                      <button
                         onClick={() => handleCreateQuote(lead.customerName)}
                         className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 sm:gap-2 transition-all hover:scale-105 active:scale-95"
                         style={{
@@ -113,7 +126,7 @@ const VendorLeads = () => {
                       </button>
                     )}
                     <div className="relative">
-                      <div 
+                      <div
                         className="rounded-lg sm:rounded-xl bg-white px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer flex items-center justify-between gap-2 min-w-[120px] shadow-sm hover:shadow-md active:scale-95"
                         style={{
                           borderColor: 'rgba(237, 100, 143, 0.3)',
@@ -121,27 +134,26 @@ const VendorLeads = () => {
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setOpenDropdown(openDropdown === lead.id ? null : lead.id);
+                          setOpenDropdown(openDropdown === leadId ? null : leadId);
                         }}
                       >
                         {lead.status}
-                        <Icon name="chevronDown" size="xs" color="#ed648f" className={`transition-transform duration-300 ${openDropdown === lead.id ? 'rotate-180' : ''}`} />
+                        <Icon name="chevronDown" size="xs" color="#ed648f" className={`transition-transform duration-300 ${openDropdown === leadId ? 'rotate-180' : ''}`} />
                       </div>
-                      
+
                       {/* Custom Dropdown Menu - Opens Upwards */}
-                      {openDropdown === lead.id && (
+                      {openDropdown === leadId && (
                         <>
                           <div className="fixed inset-0 z-[90]" onClick={() => setOpenDropdown(null)}></div>
                           <div className="absolute right-0 bottom-full mb-2 w-44 bg-white rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.15)] border border-[#ed648f20] transition-all z-[100] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200 origin-bottom-right">
                             {statusOptions.map((option) => (
                               <div
                                 key={option}
-                                className={`px-4 py-3 text-[11px] sm:text-xs font-bold cursor-pointer transition-colors flex items-center gap-3 ${
-                                  lead.status === option ? 'bg-[#ed648f10] text-[#ed648f]' : 'text-slate-600 hover:bg-[#ed648f08] hover:text-[#ed648f]'
-                                }`}
+                                className={`px-4 py-3 text-[11px] sm:text-xs font-bold cursor-pointer transition-colors flex items-center gap-3 ${lead.status === option ? 'bg-[#ed648f10] text-[#ed648f]' : 'text-slate-600 hover:bg-[#ed648f08] hover:text-[#ed648f]'
+                                  }`}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  updateStatus(lead.id, option);
+                                  updateStatus(leadId, option);
                                   setOpenDropdown(null);
                                 }}
                               >

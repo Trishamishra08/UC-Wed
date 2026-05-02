@@ -1,5 +1,21 @@
 const Vendor = require('./Vendor');
+const Lead = require('./Lead');
+const Booking = require('./Booking');
+const Review = require('./Review');
+const Notification = require('./Notification');
+const Quote = require('./Quote');
+const Conversation = require('./Conversation');
+const Message = require('./Message');
+const SupportTicket = require('./SupportTicket');
+const SubscriptionPlan = require('../admin/SubscriptionPlan');
 const jwt = require('jsonwebtoken');
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
 // @desc    Register vendor
 // @route   POST /api/vendor/register
@@ -167,6 +183,554 @@ exports.uploadMedia = async (req, res, next) => {
             success: true,
             url: req.file.path, // Cloudinary URL
             public_id: req.file.filename
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Get vendor dashboard stats
+// @route   GET /api/vendor/stats
+// @access  Private
+exports.getStats = async (req, res, next) => {
+    try {
+        const vendorId = req.vendor.id;
+
+        const [leadsCount, bookingsCount, reviewsCount, vendor] = await Promise.all([
+            Lead.countDocuments({ vendorId }),
+            Booking.countDocuments({ vendorId }),
+            Review.countDocuments({ vendorId }),
+            Vendor.findById(vendorId).select('profileViews')
+        ]);
+
+        // Calculate conversion rate (leads to bookings)
+        const conversionRate = leadsCount > 0 ? ((bookingsCount / leadsCount) * 100).toFixed(1) : 0;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                profileViews: vendor.profileViews || 0,
+                inquiries: leadsCount,
+                bookings: bookingsCount,
+                conversionRate: parseFloat(conversionRate),
+                reviewsCount
+            }
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Get vendor leads
+// @route   GET /api/vendor/leads
+// @access  Private
+exports.getLeads = async (req, res, next) => {
+    try {
+        const leads = await Lead.find({ vendorId: req.vendor.id }).sort('-createdAt');
+
+        res.status(200).json({
+            success: true,
+            data: leads
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Update lead status
+// @route   PUT /api/vendor/leads/:id
+// @access  Private
+exports.updateLeadStatus = async (req, res, next) => {
+    try {
+        const { status } = req.body;
+        const lead = await Lead.findOneAndUpdate(
+            { _id: req.params.id, vendorId: req.vendor.id },
+            { status },
+            { new: true, runValidators: true }
+        );
+
+        if (!lead) {
+            return res.status(404).json({
+                success: false,
+                message: 'Lead not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: lead
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Get vendor bookings
+// @route   GET /api/vendor/bookings
+// @access  Private
+exports.getBookings = async (req, res, next) => {
+    try {
+        const bookings = await Booking.find({ vendorId: req.vendor.id }).sort('-eventDate');
+
+        res.status(200).json({
+            success: true,
+            data: bookings
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Get vendor reviews
+// @route   GET /api/vendor/reviews
+// @access  Private
+exports.getReviews = async (req, res, next) => {
+    try {
+        const reviews = await Review.find({ vendorId: req.vendor.id }).populate('userId', 'name profileImage').sort('-createdAt');
+
+        res.status(200).json({
+            success: true,
+            data: reviews
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Reply to review
+// @route   PUT /api/vendor/reviews/:id/reply
+// @access  Private
+exports.replyToReview = async (req, res, next) => {
+    try {
+        const { reply } = req.body;
+        const review = await Review.findOneAndUpdate(
+            { _id: req.params.id, vendorId: req.vendor.id },
+            { reply },
+            { new: true, runValidators: true }
+        );
+
+        if (!review) {
+            return res.status(404).json({
+                success: false,
+                message: 'Review not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: review
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Get vendor notifications
+// @route   GET /api/vendor/notifications
+// @access  Private
+exports.getNotifications = async (req, res, next) => {
+    try {
+        const notifications = await Notification.find({ vendorId: req.vendor.id }).sort('-createdAt').limit(20);
+
+        res.status(200).json({
+            success: true,
+            data: notifications
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Mark notification as read
+// @route   PUT /api/vendor/notifications/:id/read
+// @access  Private
+exports.markNotificationRead = async (req, res, next) => {
+    try {
+        const notification = await Notification.findOneAndUpdate(
+            { _id: req.params.id, vendorId: req.vendor.id },
+            { isRead: true },
+            { new: true }
+        );
+
+        if (!notification) {
+            return res.status(404).json({
+                success: false,
+                message: 'Notification not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: notification
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Get all active subscription plans
+// @route   GET /api/vendor/subscription/plans
+// @access  Private
+exports.getSubscriptionPlans = async (req, res, next) => {
+    try {
+        const plans = await SubscriptionPlan.find({ isActive: true });
+        
+        if (plans.length === 0) {
+            const defaultPlan = await SubscriptionPlan.create({
+                name: 'Premium Partner',
+                price: 4999,
+                durationValue: 1,
+                durationUnit: 'year',
+                features: ['Full Access']
+            });
+            return res.status(200).json({ success: true, data: [defaultPlan] });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: plans
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Create Razorpay Order for Subscription
+// @route   POST /api/vendor/subscription/order
+// @access  Private
+exports.createSubscriptionOrder = async (req, res, next) => {
+    try {
+        const { planId } = req.body;
+        
+        const plan = await SubscriptionPlan.findById(planId);
+        
+        if (!plan || !plan.isActive) {
+            return res.status(404).json({ success: false, message: 'Active plan not found' });
+        }
+
+        const options = {
+            amount: plan.price * 100, // amount in the smallest currency unit
+            currency: "INR",
+            receipt: `sub_${req.vendor._id.toString().slice(-10)}_${Date.now().toString().slice(-8)}`,
+            notes: {
+                vendorId: req.vendor._id,
+                planId: plan._id
+            }
+        };
+
+        const order = await razorpay.orders.create(options);
+
+        // Update vendor with pending order details
+        await Vendor.findByIdAndUpdate(req.vendor.id, {
+            'subscription.planId': plan._id,
+            'subscription.planName': plan.name,
+            'subscription.amount': plan.price,
+            'subscription.orderId': order.id,
+            'subscription.status': 'Pending'
+        });
+
+        res.status(200).json({
+            success: true,
+            order,
+            plan
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Verify Razorpay Payment and Update Subscription
+// @route   POST /api/vendor/subscription/verify
+// @access  Private
+exports.verifySubscriptionPayment = async (req, res, next) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+        const sign = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSign = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(sign.toString())
+            .digest("hex");
+
+        if (razorpay_signature === expectedSign) {
+            // Fetch plan to get duration
+            const plan = await SubscriptionPlan.findOne({ isActive: true });
+            const durationValue = plan?.durationValue || 1;
+            const durationUnit = plan?.durationUnit || 'year';
+
+            const startDate = new Date();
+            const endDate = new Date();
+            
+            if (durationUnit === 'year') {
+                endDate.setFullYear(startDate.getFullYear() + durationValue);
+            } else {
+                endDate.setMonth(startDate.getMonth() + durationValue);
+            }
+
+            // Payment success
+            const vendor = await Vendor.findByIdAndUpdate(req.vendor.id, {
+                'subscription.status': 'Active',
+                'subscription.paymentId': razorpay_payment_id,
+                'subscription.startDate': startDate,
+                'subscription.endDate': endDate
+            }, { new: true });
+
+            res.status(200).json({
+                success: true,
+                message: 'Payment verified successfully',
+                data: vendor
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid signature'
+            });
+        }
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Get current subscription plan
+// @route   GET /api/vendor/subscription/plan
+// @access  Private
+exports.getSubscriptionPlan = async (req, res, next) => {
+    try {
+        let plan = await SubscriptionPlan.findOne({ isActive: true });
+        
+        if (!plan) {
+            plan = await SubscriptionPlan.create({
+                name: 'Premium Partner',
+                price: 4999,
+                features: [
+                    'Receive unlimited verified leads',
+                    'Priority ranking in search results',
+                    'Full portfolio & video showcase',
+                    'Exclusive verified vendor badge',
+                    'Direct customer chat access',
+                    'Premium 24/7 dedicated support'
+                ]
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: plan
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+
+// @desc    Get earnings summary
+// @route   GET /api/vendor/earnings
+// @access  Private
+exports.getEarningsSummary = async (req, res, next) => {
+    try {
+        const vendorId = req.vendor.id;
+        const bookings = await Booking.find({ vendorId });
+
+        const totalEarnings = bookings
+            .filter(b => b.status === 'Completed')
+            .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+
+        const pendingPayments = bookings
+            .filter(b => b.status === 'Confirmed')
+            .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+
+        // Assume 10% commission for now
+        const platformCommission = totalEarnings * 0.1;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                totalEarnings,
+                pendingPayments,
+                platformCommission,
+                currency: 'INR'
+            }
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Get quotes
+// @route   GET /api/vendor/quotes
+// @access  Private
+exports.getQuotes = async (req, res, next) => {
+    try {
+        const quotes = await Quote.find({ vendorId: req.vendor.id })
+            .populate('userId', 'name email phone')
+            .populate('leadId')
+            .sort('-createdAt');
+
+        res.status(200).json({
+            success: true,
+            data: quotes
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Create quote
+// @route   POST /api/vendor/quotes
+// @access  Private
+exports.createQuote = async (req, res, next) => {
+    try {
+        const vendorId = req.vendor.id;
+        const { leadId, userId, items, taxAmount, discountAmount, validUntil, notes, terms } = req.body;
+
+        const totalAmount = items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0) + (taxAmount || 0) - (discountAmount || 0);
+
+        const quote = await Quote.create({
+            vendorId,
+            leadId,
+            userId,
+            items,
+            totalAmount,
+            taxAmount,
+            discountAmount,
+            validUntil,
+            notes,
+            terms,
+            status: 'Sent'
+        });
+
+        // Update lead status
+        await Lead.findByIdAndUpdate(leadId, { status: 'Quote Sent' });
+
+        res.status(201).json({
+            success: true,
+            data: quote
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Get chat conversations
+// @route   GET /api/vendor/conversations
+// @access  Private
+exports.getConversations = async (req, res, next) => {
+    try {
+        const conversations = await Conversation.find({
+            'participants.participantId': req.vendor.id
+        }).sort('-updatedAt');
+
+        res.status(200).json({
+            success: true,
+            data: conversations
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Get messages for a conversation
+// @route   GET /api/vendor/messages/:conversationId
+// @access  Private
+exports.getMessages = async (req, res, next) => {
+    try {
+        const messages = await Message.find({
+            conversationId: req.params.conversationId
+        }).sort('createdAt');
+
+        res.status(200).json({
+            success: true,
+            data: messages
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Send a message
+// @route   POST /api/vendor/messages
+// @access  Private
+exports.sendMessage = async (req, res, next) => {
+    try {
+        const { conversationId, text, attachments } = req.body;
+
+        const message = await Message.create({
+            conversationId,
+            senderId: req.vendor.id,
+            senderModel: 'Vendor',
+            text,
+            attachments
+        });
+
+        await Conversation.findByIdAndUpdate(conversationId, {
+            lastMessage: {
+                text,
+                senderId: req.vendor.id,
+                createdAt: new Date()
+            }
+        });
+
+        res.status(201).json({
+            success: true,
+            data: message
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Get support tickets
+// @route   GET /api/vendor/support
+// @access  Private
+exports.getSupportTickets = async (req, res, next) => {
+    try {
+        const tickets = await SupportTicket.find({ vendorId: req.vendor.id }).sort('-createdAt');
+
+        res.status(200).json({
+            success: true,
+            data: tickets
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Create support ticket
+// @route   POST /api/vendor/support
+// @access  Private
+exports.createSupportTicket = async (req, res, next) => {
+    try {
+        const { subject, category, message, priority } = req.body;
+
+        const ticket = await SupportTicket.create({
+            vendorId: req.vendor.id,
+            subject,
+            category,
+            message,
+            priority
+        });
+
+        res.status(201).json({
+            success: true,
+            data: ticket
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Update settings
+// @route   PUT /api/vendor/settings
+// @access  Private
+exports.updateSettings = async (req, res, next) => {
+    try {
+        const vendor = await Vendor.findByIdAndUpdate(req.vendor.id, {
+            $set: { settings: req.body }
+        }, { new: true });
+
+        res.status(200).json({
+            success: true,
+            data: vendor
         });
     } catch (err) {
         next(err);

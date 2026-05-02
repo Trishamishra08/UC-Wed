@@ -7,14 +7,40 @@ const AdminLogin = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        // Simulated Secure Handshake
-        setTimeout(() => {
+
+        try {
+            const res = await fetch('/api/user/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    email: credentials.username, 
+                    password: credentials.masterKey 
+                })
+            });
+            
+            const result = await res.json();
+
+            if (result.success) {
+                // Store token
+                localStorage.setItem('adminToken', result.data.token);
+                localStorage.setItem('adminUser', JSON.stringify(result.data.user));
+                
+                setTimeout(() => {
+                    setIsLoading(false);
+                    navigate('/admin/dashboard');
+                }, 1000);
+            } else {
+                setIsLoading(false);
+                alert(result.message || 'Invalid Admin Credentials');
+            }
+        } catch (err) {
             setIsLoading(false);
-            navigate('/admin/dashboard');
-        }, 1200);
+            console.error('Admin Login Error:', err);
+            alert('Connection failed. Please check your backend.');
+        }
     };
 
     return (
@@ -35,13 +61,13 @@ const AdminLogin = () => {
 
                     <form onSubmit={handleLogin} className="space-y-6 relative z-10">
                         <div className="space-y-2">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Operator ID</label>
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Admin Email</label>
                             <div className="relative">
-                                <Icon name="user" size="xs" color="#94a3b8" className="absolute left-4 top-1/2 -translate-y-1/2" />
+                                <Icon name="mail" size="xs" color="#94a3b8" className="absolute left-4 top-1/2 -translate-y-1/2" />
                                 <input
-                                    type="text"
+                                    type="email"
                                     required
-                                    placeholder="operator_alias"
+                                    placeholder="admin@example.com"
                                     value={credentials.username}
                                     onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
                                     className="w-full h-12 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] font-bold text-slate-900 outline-none focus:border-primary-400/50 transition-all placeholder:text-slate-300"
@@ -50,9 +76,9 @@ const AdminLogin = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Master Access Key</label>
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Access Password</label>
                             <div className="relative">
-                                <Icon name="dashboard" size="xs" color="#94a3b8" className="absolute left-4 top-1/2 -translate-y-1/2" />
+                                <Icon name="lock" size="xs" color="#94a3b8" className="absolute left-4 top-1/2 -translate-y-1/2" />
                                 <input
                                     type="password"
                                     required
@@ -73,9 +99,9 @@ const AdminLogin = () => {
                             {isLoading ? (
                                 <>
                                     <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
-                                    Handshaking...
+                                    Authenticating...
                                 </>
-                            ) : 'Unlock Console'}
+                            ) : 'Login to Console'}
                         </button>
                     </form>
 

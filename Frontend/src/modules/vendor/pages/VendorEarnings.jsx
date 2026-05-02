@@ -1,6 +1,29 @@
+import { useState, useEffect } from 'react';
 import Icon from '../../../components/ui/Icon';
+import { vendorApi } from '../vendorApi';
 
 const VendorEarnings = () => {
+  const [earnings, setEarnings] = useState({
+    totalEarnings: 0,
+    pendingPayments: 0,
+    platformCommission: 0,
+    currency: 'INR'
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEarnings();
+  }, []);
+
+  const fetchEarnings = async () => {
+    const token = localStorage.getItem('vendorToken');
+    const res = await vendorApi.getEarnings(token);
+    if (res.success) {
+      setEarnings(res.data);
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
@@ -18,9 +41,9 @@ const VendorEarnings = () => {
       {/* Earnings Stats */}
       <div className="grid gap-2.5 sm:gap-4 grid-cols-2 lg:grid-cols-3">
         {[
-          { label: 'Total earnings', value: '₹4,50,000', sub: '+18% this quarter', icon: 'money', gradient: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)' },
-          { label: 'Pending payments', value: '₹80,000', sub: '2 invoices awaiting', icon: 'clock', gradient: 'linear-gradient(135deg, #fffbeb, #fef3c7)' },
-          { label: 'Platform commission', value: '₹45,000', sub: 'Calculated on confirmed bookings', icon: 'chart', gradient: 'linear-gradient(135deg, #f5f3ff, #ede9fe)' }
+          { label: 'Total earnings', value: `₹${earnings.totalEarnings.toLocaleString()}`, sub: '+18% this quarter', icon: 'money', gradient: 'linear-gradient(135deg, #FAF2F2, #F4DFDF)' },
+          { label: 'Pending payments', value: `₹${earnings.pendingPayments.toLocaleString()}`, sub: 'From confirmed bookings', icon: 'clock', gradient: 'linear-gradient(135deg, #fffbeb, #fef3c7)' },
+          { label: 'Platform commission', value: `₹${earnings.platformCommission.toLocaleString()}`, sub: 'Calculated at 10%', icon: 'chart', gradient: 'linear-gradient(135deg, #f5f3ff, #ede9fe)' }
         ].map((stat) => (
           <div key={stat.label} className="vendor-surface rounded-2xl sm:rounded-3xl p-3 sm:p-4 lg:p-6 group cursor-default">
             <div className="flex items-start justify-between gap-1">

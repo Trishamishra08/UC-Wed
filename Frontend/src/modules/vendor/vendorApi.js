@@ -52,5 +52,197 @@ export const vendorApi = {
             body: formData
         });
         return response.json();
+    },
+
+    getStats: async (token) => {
+        const response = await fetch(`${BASE_URL}/stats`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    getLeads: async (token) => {
+        const response = await fetch(`${BASE_URL}/leads`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    updateLeadStatus: async (id, status, token) => {
+        const response = await fetch(`${BASE_URL}/leads/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status })
+        });
+        return response.json();
+    },
+
+    getBookings: async (token) => {
+        const response = await fetch(`${BASE_URL}/bookings`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    getReviews: async (token) => {
+        const response = await fetch(`${BASE_URL}/reviews`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    replyToReview: async (id, reply, token) => {
+        const response = await fetch(`${BASE_URL}/reviews/${id}/reply`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ reply })
+        });
+        return response.json();
+    },
+
+    getNotifications: async (token) => {
+        const response = await fetch(`${BASE_URL}/notifications`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    markNotificationRead: async (id, token) => {
+        const response = await fetch(`${BASE_URL}/notifications/${id}/read`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    createSubscriptionOrder: async (data, token) => {
+        const response = await fetch(`${BASE_URL}/subscription/order`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        return response.json();
+    },
+
+    verifySubscriptionPayment: async (data, token) => {
+        const response = await fetch(`${BASE_URL}/subscription/verify`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        return response.json();
+    },
+
+    getSubscriptionPlans: async (token) => {
+        const response = await fetch(`${BASE_URL}/subscription/plans`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    getEarnings: async (token) => {
+        const response = await fetch(`${BASE_URL}/earnings`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    getQuotes: async (token) => {
+        const response = await fetch(`${BASE_URL}/quotes`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    createQuote: async (data, token) => {
+        const response = await fetch(`${BASE_URL}/quotes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        return response.json();
+    },
+
+    getConversations: async (token) => {
+        const response = await fetch(`${BASE_URL}/conversations`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    getMessages: async (conversationId, token) => {
+        const response = await fetch(`${BASE_URL}/messages/${conversationId}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    sendMessage: async (data, token) => {
+        const response = await fetch(`${BASE_URL}/messages`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        return response.json();
+    },
+
+    getSupportTickets: async (token) => {
+        const response = await fetch(`${BASE_URL}/support`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
+    createSupportTicket: async (data, token) => {
+        const response = await fetch(`${BASE_URL}/support`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        return response.json();
+    },
+
+    updateSettings: async (data, token) => {
+        const response = await fetch(`${BASE_URL}/settings`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        return response.json();
     }
 };
