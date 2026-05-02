@@ -8,7 +8,7 @@ const SubscriptionPlan = require('./SubscriptionPlan');
 exports.getAllSubscriptionPlans = async (req, res, next) => {
     try {
         const plans = await SubscriptionPlan.find().sort('-createdAt');
-        
+
         if (plans.length === 0) {
             // Create initial default plan
             const defaultPlan = await SubscriptionPlan.create({
@@ -85,6 +85,26 @@ exports.updateSubscriptionPlan = async (req, res, next) => {
     }
 };
 
+// @desc    Delete subscription plan
+// @route   DELETE /api/admin/subscription-plans/:id
+// @access  Private/Admin
+exports.deleteSubscriptionPlan = async (req, res, next) => {
+    try {
+        const plan = await SubscriptionPlan.findByIdAndDelete(req.params.id);
+
+        if (!plan) {
+            return res.status(404).json({ success: false, message: 'Plan not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Plan deleted successfully'
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 // @desc    Get all vendors
 // @route   GET /api/admin/vendors
 // @access  Private/Admin
@@ -116,7 +136,7 @@ exports.updateVendorStatus = async (req, res, next) => {
             });
         }
 
-        const vendor = await Vendor.findByIdAndUpdate(req.params.id, { 
+        const vendor = await Vendor.findByIdAndUpdate(req.params.id, {
             status,
             isVerified: status === 'Approved'
         }, {
@@ -135,6 +155,73 @@ exports.updateVendorStatus = async (req, res, next) => {
             success: true,
             data: vendor
         });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const Category = require('./Category');
+
+// @desc    Get all categories
+// @route   GET /api/admin/categories
+// @access  Public (for registration) / Admin
+exports.getAllCategories = async (req, res, next) => {
+    try {
+        const categories = await Category.find({ isActive: true }).sort('name');
+        res.status(200).json({ success: true, data: categories });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Create category
+// @route   POST /api/admin/categories
+// @access  Private/Admin
+exports.createCategory = async (req, res, next) => {
+    try {
+        const { name, description } = req.body;
+        const existing = await Category.findOne({ name });
+        if (existing) {
+            return res.status(400).json({ success: false, message: 'Category already exists' });
+        }
+        const category = await Category.create({ name, description });
+        res.status(201).json({ success: true, data: category });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Update category
+// @route   PUT /api/admin/categories/:id
+// @access  Private/Admin
+exports.updateCategory = async (req, res, next) => {
+    try {
+        const { name, description, isActive } = req.body;
+        const category = await Category.findByIdAndUpdate(req.params.id, {
+            name,
+            description,
+            isActive
+        }, { new: true, runValidators: true });
+
+        if (!category) {
+            return res.status(404).json({ success: false, message: 'Category not found' });
+        }
+        res.status(200).json({ success: true, data: category });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Delete category
+// @route   DELETE /api/admin/categories/:id
+// @access  Private/Admin
+exports.deleteCategory = async (req, res, next) => {
+    try {
+        const category = await Category.findByIdAndDelete(req.params.id);
+        if (!category) {
+            return res.status(404).json({ success: false, message: 'Category not found' });
+        }
+        res.status(200).json({ success: true, message: 'Category deleted' });
     } catch (err) {
         next(err);
     }

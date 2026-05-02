@@ -60,5 +60,53 @@ export const adminApi = {
             body: JSON.stringify(data)
         });
         return await res.json();
+    },
+
+    deleteSubscriptionPlan: async (id, token) => {
+        const res = await fetch(`${API_URL}/subscription-plans/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return await res.json();
+    },
+
+    // Category Management
+    getCategories: async () => {
+        const res = await fetch(`${API_URL}/categories`);
+        return await res.json();
+    },
+
+    createCategory: async (data, token) => {
+        const res = await fetch(`${API_URL}/categories`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        return await res.json();
+    },
+
+    updateCategory: async (id, data, token) => {
+        const res = await fetch(`${API_URL}/categories/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        return await res.json();
+    },
+
+    deleteCategory: async (id, token) => {
+        const res = await fetch(`${API_URL}/categories/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return await res.json();
     }
 };

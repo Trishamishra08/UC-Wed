@@ -105,6 +105,27 @@ const AdminSubscriptions = () => {
         }
     };
 
+    const handleDeletePlan = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this subscription tier? This cannot be undone.')) return;
+
+        try {
+            setSubLoading(true);
+            const res = await adminApi.deleteSubscriptionPlan(id, token);
+            if (res.success) {
+                alert('Plan deleted successfully! 🗑️');
+                fetchData();
+                if (editingPlanId === id) setIsEditing(false);
+            } else {
+                alert(res.message || 'Failed to delete plan');
+            }
+        } catch (err) {
+            console.error('Delete error:', err);
+            alert('Failed to delete plan due to network error.');
+        } finally {
+            setSubLoading(false);
+        }
+    };
+
     const terminateSub = (id) => {
         if (window.confirm('Revoke this partner license? Access will be decoupled immediately.')) {
             // Terminate logic
@@ -159,18 +180,28 @@ const AdminSubscriptions = () => {
 
                         <div className="space-y-3">
                             {plans.map((p) => (
-                                <div key={p._id} className={`p-4 rounded-2xl border transition-all cursor-pointer group ${editingPlanId === p._id ? 'border-primary-400 bg-primary-50/10' : 'border-slate-50 hover:border-slate-200'}`}>
+                                <div key={p._id} className={`p-4 rounded-2xl border transition-all group ${editingPlanId === p._id ? 'border-primary-400 bg-primary-50/10' : 'border-slate-50 hover:border-slate-200'}`}>
                                     <div className="flex items-center justify-between">
-                                        <div>
+                                        <div onClick={() => handleEditClick(p)} className="flex-1 cursor-pointer">
                                             <p className="text-[11px] font-black text-slate-900">{p.name}</p>
                                             <p className="text-[9px] font-bold text-slate-400">₹{p.price.toLocaleString()} / {p.durationValue} {p.durationUnit}</p>
                                         </div>
-                                        <button 
-                                            onClick={() => handleEditClick(p)}
-                                            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-slate-100 rounded-lg transition-all"
-                                        >
-                                            <Icon name="sparkles" size="xs" color="#94a3b8" />
-                                        </button>
+                                        <div className="flex items-center gap-1">
+                                            <button 
+                                                onClick={() => handleEditClick(p)}
+                                                className="h-8 w-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-primary-50 hover:text-primary-400 transition-all opacity-0 group-hover:opacity-100"
+                                                title="Edit Plan"
+                                            >
+                                                <Icon name="search" size="xs" color="currentColor" />
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDeletePlan(p._id)}
+                                                className="h-8 w-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all opacity-0 group-hover:opacity-100"
+                                                title="Delete Plan"
+                                            >
+                                                <Icon name="logout" size="xs" color="currentColor" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
